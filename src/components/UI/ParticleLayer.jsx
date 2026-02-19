@@ -1,10 +1,8 @@
-
 import { useEffect, useRef } from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import { useTheme, FESTIVAL_PALETTES } from '../../context/ThemeContext';
 
-// ─── Holi Particle System ───────────────────────────────────────────────────
 function runHoliParticles(canvas, ctx) {
-    const colors = ['#FF006E', '#00B4D8', '#FFD60A', '#06D6A0', '#FB5607', '#8338EC'];
+    const colors = FESTIVAL_PALETTES.holi.particleColors;
     const particles = [];
     let animId;
 
@@ -58,7 +56,6 @@ function runHoliParticles(canvas, ctx) {
     return () => cancelAnimationFrame(animId);
 }
 
-// ─── Diwali Sparkle System ──────────────────────────────────────────────────
 function runDiwaliParticles(canvas, ctx) {
     const particles = [];
     let animId;
@@ -73,8 +70,6 @@ function runDiwaliParticles(canvas, ctx) {
             this.vy = -(Math.random() * 1.5 + 0.5);
             this.vx = (Math.random() - 0.5) * 0.5;
             this.opacity = Math.random();
-            this.life = Math.random();
-            this.lifeSpeed = Math.random() * 0.01 + 0.005;
             this.twinkle = Math.random() * Math.PI * 2;
         }
         update() {
@@ -90,7 +85,6 @@ function runDiwaliParticles(canvas, ctx) {
             ctx.fillStyle = this.color;
             ctx.shadowColor = this.color;
             ctx.shadowBlur = 6;
-            // Draw 4-point star
             ctx.translate(this.x, this.y);
             ctx.beginPath();
             for (let i = 0; i < 4; i++) {
@@ -110,7 +104,6 @@ function runDiwaliParticles(canvas, ctx) {
         }
     }
 
-    // Firework burst
     class Firework {
         constructor() { this.reset(); }
         reset() {
@@ -177,11 +170,10 @@ function runDiwaliParticles(canvas, ctx) {
     return () => cancelAnimationFrame(animId);
 }
 
-// ─── Navratri Mandala System ─────────────────────────────────────────────────
 function runNavratriParticles(canvas, ctx) {
     let animId;
     let rotation = 0;
-    const colors = ['#DC267F', '#7C3AED', '#F59E0B', '#06D6A0', '#EF4444', '#3B82F6'];
+    const colors = FESTIVAL_PALETTES.navratri.particleColors;
 
     function drawMandala(cx, cy, r, rot, alpha) {
         ctx.save();
@@ -198,14 +190,12 @@ function runNavratriParticles(canvas, ctx) {
             ctx.beginPath();
             ctx.ellipse(r * 0.5, 0, r * 0.3, r * 0.12, 0, 0, Math.PI * 2);
             ctx.fill();
-            // Inner dot
             ctx.fillStyle = 'white';
             ctx.beginPath();
             ctx.arc(r * 0.5, 0, r * 0.04, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
         }
-        // Center circle
         ctx.beginPath();
         ctx.arc(0, 0, r * 0.15, 0, Math.PI * 2);
         ctx.fillStyle = colors[Math.floor(rotation * 0.5) % colors.length];
@@ -213,7 +203,6 @@ function runNavratriParticles(canvas, ctx) {
         ctx.restore();
     }
 
-    // Orbiting color dots
     const orbs = Array.from({ length: 12 }, (_, i) => ({
         angle: (i / 12) * Math.PI * 2,
         speed: (Math.random() * 0.005 + 0.003) * (i % 2 === 0 ? 1 : -1),
@@ -228,7 +217,6 @@ function runNavratriParticles(canvas, ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         rotation += 0.003;
 
-        // Corner mandalas
         const corners = [
             [80, 80], [canvas.width - 80, 80],
             [80, canvas.height - 80], [canvas.width - 80, canvas.height - 80],
@@ -238,11 +226,9 @@ function runNavratriParticles(canvas, ctx) {
             drawMandala(cx, cy, 35, -rotation * 1.5, 0.1);
         });
 
-        // Center large mandala
         drawMandala(canvas.width / 2, canvas.height / 2, 120, rotation * 0.5, 0.08);
         drawMandala(canvas.width / 2, canvas.height / 2, 70, -rotation, 0.06);
 
-        // Orbiting dots
         orbs.forEach(orb => {
             orb.angle += orb.speed;
             const x = orb.cx + Math.cos(orb.angle) * orb.orbitR;
@@ -264,7 +250,366 @@ function runNavratriParticles(canvas, ctx) {
     return () => cancelAnimationFrame(animId);
 }
 
-// ─── Main Component ──────────────────────────────────────────────────────────
+function runEidParticles(canvas, ctx) {
+    const colors = FESTIVAL_PALETTES.eid.particleColors;
+    let animId;
+    let time = 0;
+    const stars = [];
+    const crescents = [];
+
+    class FloatingStar {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = initial ? Math.random() * canvas.height : -30;
+            this.size = Math.random() * 3 + 1.5;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.vy = Math.random() * 0.5 + 0.2;
+            this.vx = (Math.random() - 0.5) * 0.3;
+            this.opacity = Math.random() * 0.4 + 0.2;
+            this.twinkle = Math.random() * Math.PI * 2;
+            this.twinkleSpeed = Math.random() * 0.03 + 0.02;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.twinkle += this.twinkleSpeed;
+            this.opacity = (Math.sin(this.twinkle) + 1) / 2 * 0.5 + 0.1;
+            if (this.y > canvas.height + 20) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 8;
+            ctx.translate(this.x, this.y);
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                const x = Math.cos(angle) * this.size * 2;
+                const y = Math.sin(angle) * this.size * 2;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    class Crescent {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height * 0.5;
+            this.size = Math.random() * 30 + 20;
+            this.opacity = Math.random() * 0.08 + 0.04;
+            this.driftSpeed = (Math.random() - 0.5) * 0.15;
+        }
+        update() {
+            this.x += this.driftSpeed;
+            if (this.x > canvas.width + 50) this.x = -50;
+            if (this.x < -50) this.x = canvas.width + 50;
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = '#06D6A0';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = canvas.height > 0 ? 'rgb(240,255,248)' : '#F0FFF8';
+            ctx.beginPath();
+            ctx.arc(this.x + this.size * 0.35, this.y - this.size * 0.1, this.size * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 50; i++) stars.push(new FloatingStar());
+    for (let i = 0; i < 4; i++) crescents.push(new Crescent());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        time++;
+        crescents.forEach(c => { c.update(); c.draw(); });
+        stars.forEach(s => { s.update(); s.draw(); });
+        animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+}
+
+function runChristmasParticles(canvas, ctx) {
+    const particles = [];
+    let animId;
+
+    class Snowflake {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = initial ? Math.random() * canvas.height : -10;
+            this.size = Math.random() * 4 + 2;
+            this.vy = Math.random() * 1 + 0.3;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.opacity = Math.random() * 0.6 + 0.2;
+            this.wobble = Math.random() * Math.PI * 2;
+            this.wobbleSpeed = Math.random() * 0.02 + 0.01;
+            this.color = Math.random() > 0.7 ? '#FFD700' : Math.random() > 0.5 ? '#C62828' : '#FFFFFF';
+        }
+        update() {
+            this.wobble += this.wobbleSpeed;
+            this.x += this.vx + Math.sin(this.wobble) * 0.5;
+            this.y += this.vy;
+            if (this.y > canvas.height + 10) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 4;
+            ctx.translate(this.x, this.y);
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2;
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(angle) * this.size, Math.sin(angle) * this.size);
+            }
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(0, 0, this.size * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 70; i++) particles.push(new Snowflake());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+}
+
+function runRakhiParticles(canvas, ctx) {
+    const colors = FESTIVAL_PALETTES.rakhi.particleColors;
+    const particles = [];
+    let animId;
+
+    class HeartParticle {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = initial ? Math.random() * canvas.height : canvas.height + 20;
+            this.size = Math.random() * 8 + 4;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.vy = -(Math.random() * 1 + 0.3);
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.opacity = Math.random() * 0.4 + 0.15;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotSpeed = (Math.random() - 0.5) * 0.02;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.rotation += this.rotSpeed;
+            if (this.y < -20) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+            ctx.beginPath();
+            const s = this.size;
+            ctx.moveTo(0, s * 0.3);
+            ctx.bezierCurveTo(s * 0.5, -s * 0.3, s, s * 0.1, 0, s);
+            ctx.bezierCurveTo(-s, s * 0.1, -s * 0.5, -s * 0.3, 0, s * 0.3);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 40; i++) particles.push(new HeartParticle());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+}
+
+function runFireParticles(canvas, ctx, themeId) {
+    const palette = FESTIVAL_PALETTES[themeId] || FESTIVAL_PALETTES.default;
+    const colors = palette.particleColors;
+    const particles = [];
+    let animId;
+
+    class Ember {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = initial ? Math.random() * canvas.height : canvas.height + 10;
+            this.size = Math.random() * 4 + 1;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.vy = -(Math.random() * 1.5 + 0.5);
+            this.vx = (Math.random() - 0.5) * 1;
+            this.opacity = Math.random() * 0.5 + 0.2;
+            this.life = 1;
+            this.decay = Math.random() * 0.005 + 0.002;
+            this.wobble = Math.random() * Math.PI * 2;
+        }
+        update() {
+            this.wobble += 0.03;
+            this.x += this.vx + Math.sin(this.wobble) * 0.3;
+            this.y += this.vy;
+            this.life -= this.decay;
+            this.opacity = this.life * 0.5;
+            if (this.life <= 0 || this.y < -10) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * this.life, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 50; i++) particles.push(new Ember());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+}
+
+function runOnamParticles(canvas, ctx) {
+    const colors = FESTIVAL_PALETTES.onam.particleColors;
+    const petals = [];
+    let animId;
+
+    class Petal {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = initial ? Math.random() * canvas.height : -20;
+            this.size = Math.random() * 8 + 5;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.vy = Math.random() * 1 + 0.3;
+            this.vx = (Math.random() - 0.5) * 1;
+            this.opacity = Math.random() * 0.4 + 0.2;
+            this.rotation = Math.random() * Math.PI * 2;
+            this.rotSpeed = (Math.random() - 0.5) * 0.03;
+            this.wobble = Math.random() * Math.PI * 2;
+        }
+        update() {
+            this.wobble += 0.02;
+            this.x += this.vx + Math.sin(this.wobble) * 0.5;
+            this.y += this.vy;
+            this.rotation += this.rotSpeed;
+            if (this.y > canvas.height + 20) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+            ctx.beginPath();
+            ctx.ellipse(0, 0, this.size, this.size * 0.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 45; i++) petals.push(new Petal());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        petals.forEach(p => { p.update(); p.draw(); });
+        animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+}
+
+function runDefaultParticles(canvas, ctx) {
+    const colors = FESTIVAL_PALETTES.default.particleColors;
+    const particles = [];
+    let animId;
+
+    class Dot {
+        constructor() { this.reset(true); }
+        reset(initial = false) {
+            this.x = Math.random() * canvas.width;
+            this.y = initial ? Math.random() * canvas.height : -10;
+            this.size = Math.random() * 3 + 1;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.vy = Math.random() * 0.5 + 0.1;
+            this.vx = (Math.random() - 0.5) * 0.2;
+            this.opacity = Math.random() * 0.2 + 0.05;
+            this.twinkle = Math.random() * Math.PI * 2;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.twinkle += 0.02;
+            this.opacity = (Math.sin(this.twinkle) + 1) / 2 * 0.15 + 0.05;
+            if (this.y > canvas.height + 10) this.reset();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.opacity;
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    for (let i = 0; i < 30; i++) particles.push(new Dot());
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        animId = requestAnimationFrame(animate);
+    }
+    animate();
+    return () => cancelAnimationFrame(animId);
+}
+
+const PARTICLE_RUNNERS = {
+    holi: runHoliParticles,
+    diwali: runDiwaliParticles,
+    navratri: runNavratriParticles,
+    eid: runEidParticles,
+    christmas: runChristmasParticles,
+    rakhi: runRakhiParticles,
+    onam: runOnamParticles,
+    lohri: (c, x) => runFireParticles(c, x, 'lohri'),
+    dussehra: (c, x) => runFireParticles(c, x, 'dussehra'),
+    pongal: (c, x) => runFireParticles(c, x, 'pongal'),
+    default: runDefaultParticles,
+};
+
 const ParticleLayer = () => {
     const { theme } = useTheme();
     const canvasRef = useRef(null);
@@ -283,19 +628,11 @@ const ParticleLayer = () => {
         resize();
         window.addEventListener('resize', resize);
 
-        // Cleanup previous animation
         if (cleanupRef.current) cleanupRef.current();
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (theme === 'holi') {
-            cleanupRef.current = runHoliParticles(canvas, ctx);
-        } else if (theme === 'diwali') {
-            cleanupRef.current = runDiwaliParticles(canvas, ctx);
-        } else if (theme === 'navratri') {
-            cleanupRef.current = runNavratriParticles(canvas, ctx);
-        } else {
-            cleanupRef.current = null;
-        }
+        const runner = PARTICLE_RUNNERS[theme] || PARTICLE_RUNNERS.default;
+        cleanupRef.current = runner(canvas, ctx);
 
         return () => {
             window.removeEventListener('resize', resize);

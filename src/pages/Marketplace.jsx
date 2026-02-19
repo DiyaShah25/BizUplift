@@ -33,7 +33,7 @@ const ProductCard = ({ product, isWishlisted, onWishlist }) => {
     const savingsPct = Math.round((savings / product.mrp) * 100);
 
     return (
-        <div className="group festival-card rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+        <div className="group festival-card rounded-2xl overflow-hidden card-3d transition-all duration-300">
             <Link to={`/product/${product.id}`} className="block">
                 <div className="relative overflow-hidden aspect-square bg-gray-100">
                     <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
@@ -266,7 +266,7 @@ const Marketplace = () => {
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 perspective-container">
                                 {paginated.map(p => (
                                     <ProductCard key={p.id} product={p}
                                         isWishlisted={currentUser ? isWishlisted(currentUser.id, p.id) : false}

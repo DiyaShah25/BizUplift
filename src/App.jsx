@@ -9,6 +9,7 @@ import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import ParticleLayer from './components/UI/ParticleLayer';
 import ThemeSwitcher from './components/UI/ThemeSwitcher';
+
 import ToastContainer from './components/UI/ToastContainer';
 
 // Lazy-loaded pages
@@ -84,8 +85,9 @@ function App() {
                   </main>
                   <Footer />
                 </div>
-                <ThemeSwitcher />
+
                 <ToastContainer />
+                <ThemeSwitcher />
               </Router>
             </NotificationProvider>
           </CartProvider>

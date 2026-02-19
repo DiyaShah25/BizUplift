@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Package, ShoppingBag, TrendingUp, Check, X, Eye, Shield, Bell } from 'lucide-react';
+import { Users, Package, ShoppingBag, TrendingUp, Check, X, Eye, Shield, Bell, Palette } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useTheme, THEMES, FESTIVAL_CALENDAR, getNextFestival } from '../context/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';
 
 const AdminDashboard = () => {
     const { currentUser } = useAuth();
     const { users, products, orders, sellers, updateUser } = useData();
+    const { theme, adminOverride, isAutoMode, setThemeAdmin, nextFestival } = useTheme();
     const { showToast } = useNotifications();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
@@ -29,11 +31,15 @@ const AdminDashboard = () => {
 
     const TABS = [
         { id: 'overview', label: '📊 Overview' },
+        { id: 'themes', label: '🎨 Themes' },
         { id: 'users', label: '👥 Users' },
         { id: 'sellers', label: '🏪 Sellers' },
         { id: 'products', label: '📦 Products' },
         { id: 'broadcast', label: '📢 Broadcast' },
     ];
+
+    const themeList = Object.values(THEMES);
+    const sortedFestivals = getNextFestival();
 
     return (
         <div className="container py-6 pb-20 lg:pb-6">
@@ -95,6 +101,95 @@ const AdminDashboard = () => {
                                     <div className="w-3 h-3 rounded-full" style={{ background: color }} />
                                     <span className="text-sm flex-1">{label}</span>
                                     <span className="font-bold text-sm">{count}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* =========== THEME CONTROL (ADMIN ONLY) =========== */}
+            {activeTab === 'themes' && (
+                <div className="space-y-6">
+                    {/* Current Status */}
+                    <div className="festival-card rounded-2xl p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <Palette className="w-6 h-6" style={{ color: 'rgb(var(--color-primary))' }} />
+                            <div>
+                                <h3 className="font-bold text-lg">Website Theme Control</h3>
+                                <p className="text-xs text-gray-500">Only admins can change the website theme. Users see the theme applied by you or the auto-system.</p>
+                            </div>
+                        </div>
+
+                        <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(var(--color-primary), 0.06)' }}>
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-bold">Current Status</span>
+                                <span className={`text-xs font-bold px-3 py-1 rounded-full ${isAutoMode ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                    {isAutoMode ? '🤖 Auto Mode' : '✋ Manual Override'}
+                                </span>
+                            </div>
+                            <div className="text-sm text-gray-600">
+                                <p><strong>Active Theme:</strong> {THEMES[theme]?.emoji} {THEMES[theme]?.name || theme}</p>
+                                {nextFestival && <p className="mt-1"><strong>Next Festival:</strong> {nextFestival.emoji} {nextFestival.name} — {nextFestival.isActive ? '🔴 Happening now!' : `${nextFestival.daysUntil} days away`}</p>}
+                                {adminOverride && <p className="mt-1 text-xs text-red-500">⚠️ Auto-switching is disabled because you've manually set a theme.</p>}
+                            </div>
+                        </div>
+
+                        {/* Auto Mode Toggle */}
+                        <button
+                            onClick={() => { setThemeAdmin('auto'); showToast('🤖 Auto mode enabled! Theme will change with festivals.'); }}
+                            className={`w-full p-4 rounded-xl border-2 transition-all mb-4 text-left flex items-center gap-4 ${isAutoMode ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'}`}
+                        >
+                            <span className="text-3xl">🤖</span>
+                            <div className="flex-1">
+                                <div className="font-bold text-sm">Automatic Mode</div>
+                                <div className="text-xs text-gray-500">Theme changes automatically when a festival is within 15 days. Goes back to default otherwise.</div>
+                            </div>
+                            {isAutoMode && <span className="text-green-600 text-lg font-bold">✓</span>}
+                        </button>
+
+                        {/* Manual Theme Grid */}
+                        <p className="text-sm font-bold text-gray-600 mb-3">Or manually set a theme:</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                            {themeList.map(t => {
+                                const isActive = !isAutoMode && theme === t.id;
+                                return (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => { setThemeAdmin(t.id); showToast(`${t.emoji} ${t.name} theme applied!`); }}
+                                        className={`p-4 rounded-xl border-2 transition-all text-center hover:scale-[1.03] ${isActive ? 'border-current shadow-lg' : 'border-gray-200 hover:border-gray-300'}`}
+                                        style={{ borderColor: isActive ? t.dotColor : undefined }}
+                                    >
+                                        <div className="text-3xl mb-2">{t.emoji}</div>
+                                        <div className="text-sm font-bold">{t.name}</div>
+                                        <div className="text-[10px] text-gray-500">{t.description}</div>
+                                        {isActive && <div className="mt-2 text-xs font-bold" style={{ color: typeof t.dotColor === 'string' && t.dotColor.startsWith('#') ? t.dotColor : 'rgb(var(--color-primary))' }}>✓ Active</div>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Festival Timeline */}
+                    <div className="festival-card rounded-2xl p-6">
+                        <h3 className="font-bold text-lg mb-4">📅 Festival Timeline — Auto Theme Schedule</h3>
+                        <p className="text-xs text-gray-500 mb-4">When in Auto Mode, the theme activates 15 days before each festival and stays for 3 days after.</p>
+                        <div className="space-y-3">
+                            {sortedFestivals.map((f, i) => (
+                                <div key={f.id} className={`flex items-center gap-4 p-3 rounded-xl transition-all ${f.isActive ? 'bg-red-50 border border-red-200' : f.daysUntil <= 15 ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50 border border-gray-100'}`}>
+                                    <span className="text-2xl">{f.emoji}</span>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm font-bold">{f.name}</span>
+                                            {f.isActive && <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-red-500 text-white animate-pulse">LIVE</span>}
+                                            {!f.isActive && i === 0 && <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-yellow-400 text-yellow-900">NEXT</span>}
+                                            {f.daysUntil <= 15 && !f.isActive && <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-green-100 text-green-700">THEME ACTIVE</span>}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                            {f.nextDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })} — {f.isActive ? '🔴 Happening now' : `${f.daysUntil} days away`}
+                                        </div>
+                                    </div>
+                                    <div className="w-5 h-5 rounded-full" style={{ background: f.color }} />
                                 </div>
                             ))}
                         </div>

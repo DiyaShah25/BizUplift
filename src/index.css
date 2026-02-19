@@ -86,6 +86,202 @@
 }
 
 /* ============================================
+   EID THEME
+   ============================================ */
+[data-theme="eid"] {
+  --color-primary: 6 214 160;
+  --color-primary-light: 16 185 129;
+  --color-primary-dark: 27 94 32;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 27 94 32;
+  --color-accent: 6 214 160;
+  --color-surface: 255 255 255;
+  --color-background: 240 255 248;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(6, 214, 160, 0.15);
+  --border-card: 1px solid rgba(6, 214, 160, 0.2);
+  --btn-gradient: linear-gradient(135deg, #06D6A0, #1B5E20);
+  --heading-gradient: linear-gradient(90deg, #06D6A0, #1B5E20, #06D6A0);
+}
+
+/* ============================================
+   CHRISTMAS THEME
+   ============================================ */
+[data-theme="christmas"] {
+  --color-primary: 198 40 40;
+  --color-primary-light: 239 83 80;
+  --color-primary-dark: 136 14 14;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 46 125 50;
+  --color-accent: 46 125 50;
+  --color-surface: 255 255 255;
+  --color-background: 255 248 245;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(198, 40, 40, 0.12);
+  --border-card: 1px solid rgba(198, 40, 40, 0.15);
+  --btn-gradient: linear-gradient(135deg, #C62828, #2E7D32, #C62828);
+  --heading-gradient: linear-gradient(90deg, #C62828, #2E7D32, #FFD700, #C62828);
+}
+
+/* ============================================
+   ONAM THEME
+   ============================================ */
+[data-theme="onam"] {
+  --color-primary: 255 111 0;
+  --color-primary-light: 255 193 7;
+  --color-primary-dark: 230 81 0;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 255 111 0;
+  --color-accent: 255 193 7;
+  --color-surface: 255 255 255;
+  --color-background: 255 253 240;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(255, 111, 0, 0.15);
+  --border-card: 1px solid rgba(255, 111, 0, 0.2);
+  --btn-gradient: linear-gradient(135deg, #FF6F00, #FFD700, #FF6F00);
+  --heading-gradient: linear-gradient(90deg, #FF6F00, #FFD700, #FF6F00);
+}
+
+/* ============================================
+   RAKSHA BANDHAN THEME
+   ============================================ */
+[data-theme="rakhi"] {
+  --color-primary: 233 30 140;
+  --color-primary-light: 244 143 177;
+  --color-primary-dark: 136 14 79;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 124 58 237;
+  --color-accent: 124 58 237;
+  --color-surface: 255 255 255;
+  --color-background: 253 245 255;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(233, 30, 140, 0.15);
+  --border-card: 1px solid rgba(233, 30, 140, 0.2);
+  --btn-gradient: linear-gradient(135deg, #E91E8C, #7C3AED, #E91E8C);
+  --heading-gradient: linear-gradient(90deg, #E91E8C, #7C3AED, #E91E8C);
+}
+
+/* ============================================
+   DUSSEHRA THEME
+   ============================================ */
+[data-theme="dussehra"] {
+  --color-primary: 255 107 0;
+  --color-primary-light: 255 167 38;
+  --color-primary-dark: 198 40 40;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 198 40 40;
+  --color-accent: 198 40 40;
+  --color-surface: 255 255 255;
+  --color-background: 255 248 240;
+  --font-heading: 'Cinzel', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(255, 107, 0, 0.15);
+  --border-card: 1px solid rgba(255, 107, 0, 0.2);
+  --btn-gradient: linear-gradient(135deg, #FF6B00, #C62828, #FF6B00);
+  --heading-gradient: linear-gradient(90deg, #FF6B00, #C62828, #FFD700, #FF6B00);
+}
+
+/* ============================================
+   PONGAL THEME
+   ============================================ */
+[data-theme="pongal"] {
+  --color-primary: 191 87 0;
+  --color-primary-light: 255 193 7;
+  --color-primary-dark: 121 85 72;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 121 85 72;
+  --color-accent: 255 193 7;
+  --color-surface: 255 255 255;
+  --color-background: 255 253 240;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(191, 87, 0, 0.15);
+  --border-card: 1px solid rgba(191, 87, 0, 0.2);
+  --btn-gradient: linear-gradient(135deg, #BF5700, #FFD700, #BF5700);
+  --heading-gradient: linear-gradient(90deg, #BF5700, #FFD700, #BF5700);
+}
+
+/* ============================================
+   LOHRI THEME
+   ============================================ */
+[data-theme="lohri"] {
+  --color-primary: 255 107 0;
+  --color-primary-light: 255 138 0;
+  --color-primary-dark: 191 54 12;
+  --color-secondary: 30 30 30;
+  --color-secondary-light: 198 40 40;
+  --color-accent: 255 214 10;
+  --color-surface: 255 255 255;
+  --color-background: 255 248 240;
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Outfit', sans-serif;
+  --shadow-card: 0 4px 24px rgba(255, 107, 0, 0.15);
+  --border-card: 1px solid rgba(255, 107, 0, 0.2);
+  --btn-gradient: linear-gradient(135deg, #FF6B00, #C62828, #FF6B00);
+  --heading-gradient: linear-gradient(90deg, #FF6B00, #C62828, #FFD60A, #FF6B00);
+}
+
+/* New festival card styles */
+[data-theme="eid"] .festival-card,
+[data-theme="christmas"] .festival-card,
+[data-theme="onam"] .festival-card,
+[data-theme="rakhi"] .festival-card,
+[data-theme="dussehra"] .festival-card,
+[data-theme="pongal"] .festival-card,
+[data-theme="lohri"] .festival-card {
+  background: white;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+[data-theme="eid"] .festival-card::before,
+[data-theme="christmas"] .festival-card::before,
+[data-theme="onam"] .festival-card::before,
+[data-theme="rakhi"] .festival-card::before,
+[data-theme="dussehra"] .festival-card::before,
+[data-theme="pongal"] .festival-card::before,
+[data-theme="lohri"] .festival-card::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+}
+
+[data-theme="eid"] .festival-card::before {
+  background: linear-gradient(135deg, #06D6A0, #1B5E20, #A7F3D0);
+}
+
+[data-theme="christmas"] .festival-card::before {
+  background: linear-gradient(135deg, #C62828, #2E7D32, #FFD700);
+}
+
+[data-theme="onam"] .festival-card::before {
+  background: linear-gradient(135deg, #FF6F00, #FFD700, #FFA726);
+}
+
+[data-theme="rakhi"] .festival-card::before {
+  background: linear-gradient(135deg, #E91E8C, #7C3AED, #F48FB1);
+}
+
+[data-theme="dussehra"] .festival-card::before {
+  background: linear-gradient(135deg, #FF6B00, #C62828, #FFD700);
+}
+
+[data-theme="pongal"] .festival-card::before {
+  background: linear-gradient(135deg, #BF5700, #FFD700, #8D6E63);
+}
+
+[data-theme="lohri"] .festival-card::before {
+  background: linear-gradient(135deg, #FF6B00, #C62828, #FFD60A);
+}
+
+/* ============================================
    BASE STYLES
    ============================================ */
 @layer base {
@@ -662,4 +858,152 @@
 
 .animate-bounce-once {
   animation: bounceOnce 0.6s ease-in-out;
+}
+
+/* ============================================
+   3D CARD EFFECTS
+   ============================================ */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+}
+
+.card-3d:hover {
+  transform: perspective(800px) rotateY(3deg) rotateX(-2deg) translateY(-6px);
+  box-shadow:
+    -6px 8px 30px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(var(--color-primary), 0.12);
+}
+
+.card-3d-reverse:hover {
+  transform: perspective(800px) rotateY(-3deg) rotateX(2deg) translateY(-6px);
+}
+
+/* ============================================
+   GLASSMORPHISM UTILITY
+   ============================================ */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="diwali"] .glass {
+  background: rgba(255, 215, 0, 0.06);
+  border: 1px solid rgba(255, 215, 0, 0.15);
+}
+
+/* ============================================
+   3D PERSPECTIVE GRID
+   ============================================ */
+.perspective-container {
+  perspective: 1200px;
+  perspective-origin: center center;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.tilt-card:hover {
+  transform: rotateX(-4deg) rotateY(4deg) scale(1.02);
+}
+
+.tilt-card:nth-child(even):hover {
+  transform: rotateX(4deg) rotateY(-4deg) scale(1.02);
+}
+
+/* ============================================
+   STAGGER FADE ANIMATIONS
+   ============================================ */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-slide-left {
+  animation: slideInFromLeft 0.6s ease-out forwards;
+}
+
+.animate-slide-right {
+  animation: slideInFromRight 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+/* ============================================
+   GLOW UTILITIES
+   ============================================ */
+.glow-primary {
+  box-shadow: 0 0 20px rgba(var(--color-primary), 0.3);
+}
+
+.glow-primary-hover:hover {
+  box-shadow: 0 0 30px rgba(var(--color-primary), 0.5);
+}
+
+/* ============================================
+   DIWALI SPECIFIC DARK MODE - INPUTS
+   ============================================ */
+[data-theme="diwali"] input,
+[data-theme="diwali"] textarea,
+[data-theme="diwali"] select {
+  background-color: rgba(255, 215, 0, 0.05) !important;
+  border-color: rgba(255, 215, 0, 0.25) !important;
+  color: #FFF8E7 !important;
+}
+
+[data-theme="diwali"] input::placeholder,
+[data-theme="diwali"] textarea::placeholder {
+  color: rgba(255, 248, 231, 0.4) !important;
+}
+
+/* ============================================
+   SMOOTH THEME TRANSITION
+   ============================================ */
+html {
+  transition: background-color 0.6s ease;
+}
+
+body,
+.festival-card,
+nav,
+footer,
+.festival-heading {
+  transition: all 0.5s ease;
 }
