@@ -239,7 +239,16 @@ export const DataProvider = ({ children }) => {
             addCredits, getUserCredits,
             addReview, getProductReviews,
             registerUser, updateUser,
+
             saveNegotiation,
+            createSellerProfile: (profile) => {
+                const newSellerId = `s${Date.now()}`;
+                const newSeller = { ...profile, id: newSellerId, rating: 0, totalOrders: 0, verified: false, products: 0, joinedAt: new Date().toISOString().split('T')[0] };
+                const updatedSellers = [...sellers, newSeller];
+                setSellers(updatedSellers);
+                localStorage.setItem('bizuplift_sellers', JSON.stringify(updatedSellers));
+                return newSellerId;
+            },
         }}>
             {children}
         </DataContext.Provider>

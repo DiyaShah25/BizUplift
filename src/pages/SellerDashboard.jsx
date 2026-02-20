@@ -21,10 +21,85 @@ const SellerDashboard = () => {
     const [productModal, setProductModal] = useState(null); // null | 'add' | product object
     const [productForm, setProductForm] = useState({ name: '', description: '', category: 'Handicrafts', festival: 'Diwali', mrp: '', price: '', minPrice: '', maxDiscount: 20, stock: 10, negotiable: true, images: ['https://picsum.photos/seed/new/400/400'], tags: '' });
 
+    const { updateCurrentUser } = useAuth();
+    const { createSellerProfile } = useData();
+
     if (!currentUser || currentUser.role !== 'seller') { navigate('/auth'); return null; }
 
     const sellerId = currentUser.sellerId;
     const seller = sellers.find(s => s.id === sellerId);
+
+    // Onboarding State
+    const [onboardingForm, setOnboardingForm] = useState({ business: '', category: 'Handicrafts', city: '', state: '', story: '' });
+
+    if (!seller) {
+        const handleOnboarding = (e) => {
+            e.preventDefault();
+            if (!onboardingForm.business || !onboardingForm.city) { showToast('Please fill all required fields', 'error'); return; }
+
+            const newSellerId = createSellerProfile({
+                ...onboardingForm,
+                name: currentUser.name,
+                email: currentUser.email,
+                avatar: currentUser.avatar
+            });
+
+            updateCurrentUser({ sellerId: newSellerId });
+            showToast('Seller profile created! Welcome aboard 🎉');
+        };
+
+        return (
+            <div className="container py-10 max-w-2xl">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-heading font-bold mb-2">Welcome, {currentUser.name}! 👋</h1>
+                    <p className="text-gray-500">Let's set up your seller profile to start selling on BizUplift.</p>
+                </div>
+
+                <div className="festival-card rounded-2xl p-8 shadow-xl">
+                    <form onSubmit={handleOnboarding} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-semibold mb-1">Business Name *</label>
+                            <input value={onboardingForm.business} onChange={e => setOnboardingForm({ ...onboardingForm, business: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary" placeholder="e.g. ArtyCrafty" />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold mb-1">Primary Category *</label>
+                            <select value={onboardingForm.category} onChange={e => setOnboardingForm({ ...onboardingForm, category: e.target.value })}
+                                className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary">
+                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold mb-1">City *</label>
+                                <input value={onboardingForm.city} onChange={e => setOnboardingForm({ ...onboardingForm, city: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary" placeholder="City" />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold mb-1">State *</label>
+                                <input value={onboardingForm.state} onChange={e => setOnboardingForm({ ...onboardingForm, state: e.target.value })}
+                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary" placeholder="State" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold mb-1">Your Story (Bio)</label>
+                            <textarea value={onboardingForm.story} onChange={e => setOnboardingForm({ ...onboardingForm, story: e.target.value })}
+                                rows={4} className="w-full px-4 py-3 rounded-xl border border-gray-200 outline-none focus:border-primary resize-none"
+                                placeholder="Tell customers about your craft and journey..." />
+                        </div>
+
+                        <button type="submit" className="w-full py-3 rounded-xl text-white font-bold mt-4" style={{ background: 'var(--btn-gradient)' }}>
+                            Create Seller Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
+    }
+
     const sellerProducts = products.filter(p => p.sellerId === sellerId);
     const sellerOrders = orders.filter(o => o.items.some(i => sellerProducts.find(p => p.id === i.productId)));
 
@@ -53,7 +128,7 @@ const SellerDashboard = () => {
 
     const handleProductSave = () => {
         if (!productForm.name || !productForm.price) { showToast('Name and price are required', 'error'); return; }
-        const data = { ...productForm, mrp: +productForm.mrp, price: +productForm.price, minPrice: +productForm.minPrice || Math.floor(+productForm.price * 0.8), sellerId, sellerName: seller?.business || currentUser.name, tags: productForm.tags.split(',').map(t => t.trim()).filter(Boolean) };
+        const data = { ...productForm, mrp: +productForm.mrp, price: +productForm.price, minPrice: +productForm.minPrice || Math.floor(+productForm.price * 0.8), sellerId, sellerName: seller.business, tags: productForm.tags.split(',').map(t => t.trim()).filter(Boolean) };
         if (productModal === 'add') { addProduct(data); showToast('Product added! 🎉'); }
         else { updateProduct(productModal.id, data); showToast('Product updated!'); }
         setProductModal(null);
