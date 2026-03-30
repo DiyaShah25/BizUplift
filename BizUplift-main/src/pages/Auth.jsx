@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { useAuth } from '../context/AuthContext';
+import { useData } from '../context/DataContext';
 import { useNotifications } from '../context/NotificationContext';
 import { useTheme } from '../context/ThemeContext';
 
@@ -42,7 +43,8 @@ const InputField = ({ icon: Icon, name, type = 'text', placeholder, value, onCha
 const Auth = ({ mode: initialMode }) => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login, loginWithGoogle, register, isAuthenticated } = useAuth();
+    const { login, loginWithGoogle, isAuthenticated } = useAuth();
+    const { registerUser } = useData();
     const { showToast } = useNotifications();
     const { theme } = useTheme();
 
@@ -84,9 +86,9 @@ const Auth = ({ mode: initialMode }) => {
         if (!validate()) return;
         setLoading(true);
         try {
-            // login is now async — it calls the backend
-            const user = await login(form.email, form.password);
+            const user = login(form.email, form.password);
             showToast(`Welcome back, ${user.name.split(' ')[0]}! 🎉`);
+            // Admins/sellers go to their dashboard; customers return to where they were
             if (user.role === 'admin') navigate('/dashboard/admin', { replace: true });
             else if (user.role === 'seller') navigate('/dashboard/seller', { replace: true });
             else navigate(from, { replace: true });
@@ -101,9 +103,11 @@ const Auth = ({ mode: initialMode }) => {
         if (!validate()) return;
         setLoading(true);
         try {
-            // register is now async — calls POST /api/auth/register, backend checks for duplicate emails
-            const newUser = await register(form.name, form.email, form.password, form.mobile, role);
-            showToast(`Welcome to BizUplift, ${newUser.name.split(' ')[0]}! You got 100 welcome points 🌟`);
+            const users = JSON.parse(localStorage.getItem('bizuplift_users') || '[]');
+            if (users.find(u => u.email === form.email)) throw new Error('Email already registered');
+            const newUser = registerUser({ name: form.name, email: form.email, mobile: form.mobile, password: form.password, role, avatar: `https://i.pravatar.cc/150?u=${Date.now()}` });
+            login(form.email, form.password);
+            showToast(`Welcome to BizUplift, ${form.name.split(' ')[0]}! You got 100 welcome points 🌟`);
             navigate(role === 'seller' ? '/dashboard/seller' : from, { replace: true });
         } catch (err) {
             setErrors({ general: err.message });
@@ -111,18 +115,17 @@ const Auth = ({ mode: initialMode }) => {
         setLoading(false);
     };
 
-    const handleGoogleSuccess = async (credentialResponse) => {
+    const handleGoogleSuccess = (credentialResponse) => {
         setLoading(true);
         try {
             const decoded = jwtDecode(credentialResponse.credential);
-            // loginWithGoogle is now async — calls the backend to create/find the user
-            const user = await loginWithGoogle(decoded);
+            const user = loginWithGoogle(decoded);
             showToast(`Welcome via Google, ${user.name.split(' ')[0]}! 🎉`);
             if (user.role === 'admin') navigate('/dashboard/admin', { replace: true });
             else if (user.role === 'seller') navigate('/dashboard/seller', { replace: true });
             else navigate(from, { replace: true });
         } catch (err) {
-            setErrors({ general: 'Google authentication failed. Please try again.' });
+            setErrors({ general: 'Google authentication failed' });
         }
         setLoading(false);
     };

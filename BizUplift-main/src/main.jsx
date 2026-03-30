@@ -5,7 +5,7 @@ import './index.css'
 import App from './App.jsx'
 
 // NOTE: Please replace this placeholder with your actual Google Client ID from Google Cloud Console
-const GOOGLE_CLIENT_ID = "230599625512-vu6m52o9nkftasdlpnm6u5nhcu0daoag.apps.googleusercontent.com";
+const GOOGLE_CLIENT_ID = "Aaiya API muki deje...";
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
