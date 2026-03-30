@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, ShoppingBag, Users, ChevronRight, ChevronLeft, Clock, Calendar, TrendingUp, Heart, Package, Shield, Gift, Lock } from 'lucide-react';
 import ProductCard from '../components/UI/ProductCard';
 import SellerCard from '../components/UI/SellerCard';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
 import { useTheme, THEMES, FESTIVAL_CALENDAR, getNextFestival, FESTIVAL_PALETTES } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 import { useCart } from '../context/CartContext';
@@ -87,7 +86,7 @@ const CATEGORY_TAGS = [
 
 const Home = () => {
     const { theme } = useTheme();
-    const { products, sellers, posts, isWishlisted, toggleWishlist, isDataLoading } = useData();
+    const { products, sellers, posts, isWishlisted, toggleWishlist } = useData();
     const { isAuthenticated, currentUser } = useAuth();
     const navigate = useNavigate();
     const heroRef = useRef(null);
@@ -106,7 +105,6 @@ const Home = () => {
     const recentPosts = posts.slice(0, 3);
 
     useEffect(() => {
-        if (isDataLoading) return;
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach(entry => {
@@ -119,17 +117,13 @@ const Home = () => {
         );
         document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
         return () => observer.disconnect();
-    }, [isDataLoading]);
+    }, []);
 
     const stats = useMemo(() => ({
         totalProducts: products.length,
         totalSellers: sellers.length,
         totalOrders: sellers.reduce((s, v) => s + v.totalOrders, 0),
     }), [products, sellers]);
-
-    if (isDataLoading) {
-        return <LoadingSpinner fullPage />;
-    }
 
     const navigateFestival = (dir) => {
         setActiveFestivalIdx(prev => {
