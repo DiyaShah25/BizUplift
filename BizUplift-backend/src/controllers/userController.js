@@ -13,7 +13,7 @@ const getProfile = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-// GET /api/users/:idIn database i have 24 products but on my website page only 20 are shown, why is this happening. Hep me solve this issue, i want all the products to be shown 
+// GET /api/users/:id
 const getUser = async (req, res, next) => {
     try {
         const user = await User.findById(req.params.id).select('-password');
@@ -56,4 +56,4 @@ const updateProfile = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { getProfile, getUser, updateUser, updateProfile };
+module.exports = { getUser, updateUser, updateProfile };

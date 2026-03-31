@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api, BASE_URL } from '../utils/api';
-const BACKEND_URL = BASE_URL.replace('/api', '');
+import { api } from '../utils/api';
 
 const DataContext = createContext();
 
@@ -18,21 +17,7 @@ export const DataProvider = ({ children }) => {
     // MongoDB uses `_id` but the frontend often uses `.id`.
     // Map _id → id for seamless compatibility.
     const normalize = (docs) =>
-        docs.map(d => {
-            const id = d._id || d.id;
-            // If sellerId is populated (object), keep its _id as the primary reference for links/filters
-            const sellerId = typeof d.sellerId === 'object' && d.sellerId !== null ? (d.sellerId._id || d.sellerId.id) : d.sellerId;
-            
-            // Normalize image URLs (prepend backend URL if path is relative)
-            const images = d.images?.map(img => 
-                (img && !img.startsWith('http')) ? `${BACKEND_URL}${img}` : img
-            );
-
-            // Also normalize single image field if it exists (e.g. in posts or orders)
-            const image = (d.image && !d.image.startsWith('http')) ? `${BACKEND_URL}${d.image}` : d.image;
-
-            return { ...d, id: id?.toString(), sellerId: sellerId?.toString(), images, image };
-        });
+        docs.map(d => ({ ...d, id: d._id || d.id }));
 
     // ─── Initial Data Fetch from Backend ─────────────────────────────────────
     useEffect(() => {
@@ -41,7 +26,7 @@ export const DataProvider = ({ children }) => {
             setDataError(null);
             try {
                 const [productsRes, sellersRes, postsRes] = await Promise.all([
-                    api.get('/products?limit=100'),
+                    api.get('/products'),
                     api.get('/sellers'),
                     api.get('/posts'),
                 ]);
@@ -125,9 +110,8 @@ export const DataProvider = ({ children }) => {
     // ─── Wishlist ─────────────────────────────────────────────────────────────
     const fetchWishlist = useCallback(async (userId) => {
         try {
-            const res = await api.get('/wishlist');
-            // Backend returns { success: true, products: [ "id1", "id2" ] } where products can be objects if populated
-            const ids = (res.products || []).map(item => typeof item === 'object' && item !== null ? (item._id || item.id) : item);
+            const data = await api.get(`/wishlist/${userId}`);
+            const ids = (data.items || data || []).map(item => item.productId || item);
             setWishlists(prev => ({ ...prev, [userId]: ids }));
             return ids;
         } catch { return []; }
@@ -142,8 +126,11 @@ export const DataProvider = ({ children }) => {
             [userId]: isInList ? userList.filter(id => id !== productId) : [...userList, productId]
         }));
         try {
-            // Backend handles both add and remove via the /toggle endpoint
-            await api.post('/wishlist/toggle', { productId });
+            if (isInList) {
+                await api.delete(`/wishlist/${userId}/${productId}`);
+            } else {
+                await api.post(`/wishlist/${userId}`, { productId });
+            }
         } catch {
             // Revert
             setWishlists(prev => ({ ...prev, [userId]: userList }));
@@ -184,19 +171,10 @@ export const DataProvider = ({ children }) => {
 
     const getUserCredits = useCallback(async (userId) => {
         try {
-            const data = await api.get(`/credits/me`);
+            const data = await api.get(`/credits/${userId}`);
             return data;
         } catch { return { balance: 0, transactions: [] }; }
     }, []);
-
-    const redeemCredits = async (points) => {
-        if (!points || points <= 0) return;
-        try {
-            await api.post('/credits/redeem', { points });
-        } catch (err) {
-            console.warn('[Credits] Failed to redeem credits:', err);
-        }
-    };
 
     // ─── Sellers ─────────────────────────────────────────────────────────────
     const createSellerProfile = async (profile) => {
@@ -236,7 +214,7 @@ export const DataProvider = ({ children }) => {
             addReview, getProductReviews, fetchProductReviews,
 
             // Credits
-            addCredits, getUserCredits, redeemCredits,
+            addCredits, getUserCredits,
 
             // Sellers
             createSellerProfile,

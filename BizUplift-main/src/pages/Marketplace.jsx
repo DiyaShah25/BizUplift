@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/UI/ProductCard';
+import LoadingSpinner from '../components/UI/LoadingSpinner';
 
 const CATEGORIES = ['All', 'Handicrafts', 'Food & Sweets', 'Clothing', 'Decoration', 'Jewelry', 'Candles & Diyas', 'Pottery'];
 const FESTIVALS_LIST = ['All', 'Diwali', 'Holi', 'Navratri', 'Eid', 'Christmas', 'Pongal', 'Onam', 'Lohri'];
@@ -17,7 +18,7 @@ const SORT_OPTIONS = [
 ];
 
 const Marketplace = () => {
-    const { products, isWishlisted, toggleWishlist } = useData();
+    const { products, isWishlisted, toggleWishlist, isDataLoading } = useData();
     const { currentUser } = useAuth();
     const [searchParams] = useSearchParams();
     
@@ -256,7 +257,9 @@ const Marketplace = () => {
 
             {/* FULL WIDTH PRODUCT GRID */}
             <div className="px-4 py-8 md:px-6 lg:px-8 max-w-[1920px] mx-auto min-h-[50vh]">
-                {paginated.length === 0 ? (
+                {isDataLoading ? (
+                    <LoadingSpinner />
+                ) : paginated.length === 0 ? (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

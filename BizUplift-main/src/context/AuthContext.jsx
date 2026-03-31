@@ -1,73 +1,73 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../utils/api';
 
 const AuthContext = createContext();
-
-// Mock JWT helpers
-const createToken = (user) => {
-    const payload = { userId: user.id, role: user.role, exp: Date.now() + 24 * 60 * 60 * 1000 };
-    return btoa(JSON.stringify(payload));
-};
-const parseToken = (token) => {
-    try { return JSON.parse(atob(token)); } catch { return null; }
-};
-const isTokenValid = (token) => {
-    const payload = parseToken(token);
-    return payload && payload.exp > Date.now();
-};
 
 export const AuthProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [token, setToken] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // On mount: restore session from localStorage token
     useEffect(() => {
         const storedToken = localStorage.getItem('bizuplift_token');
         const storedUser = localStorage.getItem('bizuplift_currentUser');
-        if (storedToken && isTokenValid(storedToken) && storedUser) {
+        if (storedToken && storedUser) {
             setToken(storedToken);
             setCurrentUser(JSON.parse(storedUser));
-        } else {
-            localStorage.removeItem('bizuplift_token');
-            localStorage.removeItem('bizuplift_currentUser');
+            // Verify token is still valid with the server
+            api.get('/auth/me').then(data => {
+                // The api helper already unwraps .data if present, but /auth/me returns { success, user }
+                const user = data?.user || data;
+                setCurrentUser(user);
+                localStorage.setItem('bizuplift_currentUser', JSON.stringify(user));
+            }).catch(() => {
+                // Token expired or invalid, clear session
+                localStorage.removeItem('bizuplift_token');
+                localStorage.removeItem('bizuplift_currentUser');
+                setToken(null);
+                setCurrentUser(null);
+            });
         }
         setLoading(false);
     }, []);
 
-    const login = (email, password) => {
-        const users = JSON.parse(localStorage.getItem('bizuplift_users') || '[]');
-        const user = users.find(u => u.email === email && u.password === password);
-        if (!user) throw new Error('Invalid email or password');
-        const newToken = createToken(user);
-        setToken(newToken);
+    const _storeSession = (token, user) => {
+        setToken(token);
         setCurrentUser(user);
-        localStorage.setItem('bizuplift_token', newToken);
+        localStorage.setItem('bizuplift_token', token);
         localStorage.setItem('bizuplift_currentUser', JSON.stringify(user));
+    };
+
+    // Email + Password Login — calls POST /api/auth/login
+    const login = async (email, password) => {
+        const json = await api.post('/auth/login', { email, password });
+        // Backend returns { success, token, user }
+        const { token, user } = json;
+        if (!token) throw new Error('Login failed: no token received');
+        _storeSession(token, user);
         return user;
     };
 
-    const loginWithGoogle = (decodedToken) => {
-        const users = JSON.parse(localStorage.getItem('bizuplift_users') || '[]');
-        let user = users.find(u => u.email === decodedToken.email);
-        
-        // Seamlessly register new users matching Google profile if they don't exist
-        if (!user) {
-            user = {
-                id: 'u' + Date.now().toString(),
-                role: 'customer', // Default role for Google SSO
-                email: decodedToken.email,
-                name: decodedToken.name,
-                avatar: decodedToken.picture,
-                createdAt: new Date().toISOString()
-            };
-            users.push(user);
-            localStorage.setItem('bizuplift_users', JSON.stringify(users));
-        }
+    // Register — calls POST /api/auth/register
+    const register = async (name, email, password, mobile, role) => {
+        const json = await api.post('/auth/register', { name, email, password, mobile, role });
+        const { token, user } = json;
+        if (!token) throw new Error('Registration failed: no token received');
+        _storeSession(token, user);
+        return user;
+    };
 
-        const newToken = createToken(user);
-        setToken(newToken);
-        setCurrentUser(user);
-        localStorage.setItem('bizuplift_token', newToken);
-        localStorage.setItem('bizuplift_currentUser', JSON.stringify(user));
+    // Google SSO — sends decoded Google profile to backend, backend creates/finds the user
+    const loginWithGoogle = async (decodedToken) => {
+        const json = await api.post('/auth/google', {
+            email: decodedToken.email,
+            name: decodedToken.name,
+            picture: decodedToken.picture,
+        });
+        const { token, user } = json;
+        if (!token) throw new Error('Google login failed: no token received');
+        _storeSession(token, user);
         return user;
     };
 
@@ -78,14 +78,12 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('bizuplift_currentUser');
     };
 
-    const updateCurrentUser = (updates) => {
-        const updated = { ...currentUser, ...updates };
-        setCurrentUser(updated);
-        localStorage.setItem('bizuplift_currentUser', JSON.stringify(updated));
-        // Also update in users array
-        const users = JSON.parse(localStorage.getItem('bizuplift_users') || '[]');
-        const updatedUsers = users.map(u => u.id === updated.id ? updated : u);
-        localStorage.setItem('bizuplift_users', JSON.stringify(updatedUsers));
+    const updateCurrentUser = async (updates) => {
+        const data = await api.put('/users/profile', updates);
+        const updatedUser = data.user || data;
+        setCurrentUser(updatedUser);
+        localStorage.setItem('bizuplift_currentUser', JSON.stringify(updatedUser));
+        return updatedUser;
     };
 
     const isAuthenticated = !!currentUser && !!token;
@@ -94,7 +92,11 @@ export const AuthProvider = ({ children }) => {
     const isAdmin = currentUser?.role === 'admin';
 
     return (
-        <AuthContext.Provider value={{ currentUser, token, loading, isAuthenticated, isCustomer, isSeller, isAdmin, login, loginWithGoogle, logout, updateCurrentUser }}>
+        <AuthContext.Provider value={{
+            currentUser, token, loading,
+            isAuthenticated, isCustomer, isSeller, isAdmin,
+            login, register, loginWithGoogle, logout, updateCurrentUser
+        }}>
             {children}
         </AuthContext.Provider>
     );

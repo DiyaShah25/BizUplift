@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Star, ShoppingBag, Users, ChevronRight, ChevronLeft, Clock, Calendar, TrendingUp, Heart, Package, Shield, Gift, Lock } from 'lucide-react';
 import ProductCard from '../components/UI/ProductCard';
 import SellerCard from '../components/UI/SellerCard';
+import LoadingSpinner from '../components/UI/LoadingSpinner';
 import { useTheme, THEMES, FESTIVAL_CALENDAR, getNextFestival, FESTIVAL_PALETTES } from '../context/ThemeContext';
 import { useData } from '../context/DataContext';
 import { useCart } from '../context/CartContext';
@@ -86,7 +87,7 @@ const CATEGORY_TAGS = [
 
 const Home = () => {
     const { theme } = useTheme();
-    const { products, sellers, posts, isWishlisted, toggleWishlist } = useData();
+    const { products, sellers, posts, isWishlisted, toggleWishlist, isDataLoading } = useData();
     const { isAuthenticated, currentUser } = useAuth();
     const navigate = useNavigate();
     const heroRef = useRef(null);
@@ -98,6 +99,10 @@ const Home = () => {
     const heroFestival = sortedFestivals[activeFestivalIdx] || sortedFestivals[0] || FESTIVAL_CALENDAR[0];
     const heroDate = useMemo(() => heroFestival.nextDate || getNextDate(heroFestival.date), [heroFestival]);
     const palette = FESTIVAL_PALETTES[theme] || FESTIVAL_PALETTES.default;
+
+    if (isDataLoading) {
+        return <LoadingSpinner fullPage />;
+    }
 
     const featuredProducts = products.filter(p => p.featured).slice(0, 8);
     const trendingProducts = products.slice(0, 8);
