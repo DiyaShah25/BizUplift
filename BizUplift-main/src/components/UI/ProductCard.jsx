@@ -91,7 +91,7 @@ const ProductCard = ({ product, isWishlisted, onWishlist }) => {
 
             {/* Content Area */}
             <div className="p-4 flex flex-col flex-grow">
-                <Link to={`/seller/${product.sellerId}`} className="text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-primary transition-colors line-clamp-1 mb-1">
+                <Link to={`/seller/${typeof product.sellerId === 'object' ? (product.sellerId._id || product.sellerId.id) : product.sellerId}`} className="text-xs font-semibold uppercase tracking-wider text-gray-400 hover:text-primary transition-colors line-clamp-1 mb-1">
                     {product.sellerName}
                 </Link>
                 <Link to={`/product/${product.id}`} className="block group/title mb-3">

@@ -279,9 +279,6 @@ const ProductDetail = () => {
     const { theme } = useTheme();
 
     const isDiwali = theme === 'diwali';
-    const product = products.find(p => p.id === id);
-
-    if (isDataLoading) return <LoadingSpinner fullPage />;
     const [chatOpen, setChatOpen] = useState(false);
     const [negotiatedPrice, setNegotiatedPrice] = useState(null);
     const [pincode, setPincode] = useState('');
@@ -289,10 +286,15 @@ const ProductDetail = () => {
     const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', body: '' });
     const [showReviewForm, setShowReviewForm] = useState(false);
     const [imageHover, setImageHover] = useState(false);
+    const [activeImage, setActiveImage] = useState(0);
+    const [quantity, setQuantity] = useState(1);
 
-    const seller = product ? sellers.find(s => s.id === product.sellerId) : null;
+    const product = products.find(p => p.id === id);
+    const seller = product ? sellers.find(s => s.id === (typeof product.sellerId === 'object' ? (product.sellerId?._id || product.sellerId?.id) : product.sellerId)) : null;
     const reviews = product ? getProductReviews(product.id) : [];
     const wishlisted = currentUser && product ? isWishlisted(currentUser.id, product.id) : false;
+
+    if (isDataLoading) return <LoadingSpinner fullPage />;
 
     if (!product) return (
         <div className="container py-20 text-center">

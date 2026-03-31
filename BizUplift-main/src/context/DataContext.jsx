@@ -17,7 +17,12 @@ export const DataProvider = ({ children }) => {
     // MongoDB uses `_id` but the frontend often uses `.id`.
     // Map _id → id for seamless compatibility.
     const normalize = (docs) =>
-        docs.map(d => ({ ...d, id: d._id || d.id }));
+        docs.map(d => {
+            const id = d._id || d.id;
+            // If sellerId is populated (object), keep its _id as the primary reference for links/filters
+            const sellerId = typeof d.sellerId === 'object' && d.sellerId !== null ? (d.sellerId._id || d.sellerId.id) : d.sellerId;
+            return { ...d, id: id?.toString(), sellerId: sellerId?.toString() };
+        });
 
     // ─── Initial Data Fetch from Backend ─────────────────────────────────────
     useEffect(() => {
