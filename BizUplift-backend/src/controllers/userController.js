@@ -56,4 +56,4 @@ const updateProfile = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-module.exports = { getUser, updateUser, updateProfile };
+module.exports = { getProfile, getUser, updateUser, updateProfile };
