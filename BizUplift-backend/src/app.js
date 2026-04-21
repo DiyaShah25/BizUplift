@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const morgan = require('morgan');
 const errorHandler = require('./middleware/errorHandler');
@@ -35,6 +36,10 @@ app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
+
+// ─── Serve Static Files ──────────────────────────────────
+// Maps /uploads requests to the backend's uploads/uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads/uploads')));
 
 // ─── Health Check ────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

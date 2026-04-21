@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { api } from '../utils/api';
+import { api, BASE_URL } from '../utils/api';
+const BACKEND_URL = BASE_URL.replace('/api', '');
 
 const DataContext = createContext();
 
@@ -21,7 +22,16 @@ export const DataProvider = ({ children }) => {
             const id = d._id || d.id;
             // If sellerId is populated (object), keep its _id as the primary reference for links/filters
             const sellerId = typeof d.sellerId === 'object' && d.sellerId !== null ? (d.sellerId._id || d.sellerId.id) : d.sellerId;
-            return { ...d, id: id?.toString(), sellerId: sellerId?.toString() };
+            
+            // Normalize image URLs (prepend backend URL if path is relative)
+            const images = d.images?.map(img => 
+                (img && !img.startsWith('http')) ? `${BACKEND_URL}${img}` : img
+            );
+
+            // Also normalize single image field if it exists (e.g. in posts or orders)
+            const image = (d.image && !d.image.startsWith('http')) ? `${BACKEND_URL}${d.image}` : d.image;
+
+            return { ...d, id: id?.toString(), sellerId: sellerId?.toString(), images, image };
         });
 
     // ─── Initial Data Fetch from Backend ─────────────────────────────────────
