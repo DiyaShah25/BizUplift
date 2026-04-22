@@ -17,7 +17,7 @@ const Navbar = () => {
     const { currentUser, isAuthenticated, logout } = useAuth();
     const { itemCount } = useCart();
     const { getUserNotifications, getUnreadCount, markAllRead } = useNotifications();
-    const { products } = useData();
+    const { products, fetchWishlist } = useData();
     const navigate = useNavigate();
     const location = useLocation();
     const searchRef = useRef(null);
@@ -42,6 +42,12 @@ const Navbar = () => {
         window.addEventListener('keydown', handleKey);
         return () => window.removeEventListener('keydown', handleKey);
     }, []);
+
+    useEffect(() => {
+        if (currentUser && currentUser.id) {
+            fetchWishlist(currentUser.id);
+        }
+    }, [currentUser, fetchWishlist]);
 
     useEffect(() => { setIsMenuOpen(false); setSearchOpen(false); }, [location]);
 
