@@ -141,61 +141,7 @@ const SellerDashboard = () => {
         { id: 'analytics', label: '📈 Analytics' },
     ];
 
-    const ProductFormModal = () => (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-lg">{productModal === 'add' ? 'Add New Product' : 'Edit Product'}</h3>
-                    <button onClick={() => setProductModal(null)}><X className="w-5 h-5 text-gray-400" /></button>
-                </div>
-                <div className="space-y-3">
-                    <input value={productForm.name} onChange={e => setProductForm(f => ({ ...f, name: e.target.value }))} placeholder="Product name" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none" />
-                    <textarea value={productForm.description} onChange={e => setProductForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none resize-none" />
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-xs text-gray-500 mb-1 block">Category</label>
-                            <select value={productForm.category} onChange={e => setProductForm(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none">
-                                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-xs text-gray-500 mb-1 block">Festival</label>
-                            <select value={productForm.festival} onChange={e => setProductForm(f => ({ ...f, festival: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none">
-                                {FESTIVALS_LIST.map(f => <option key={f}>{f}</option>)}
-                            </select>
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-3">
-                        {[['MRP (₹)', 'mrp'], ['Selling Price (₹)', 'price'], ['Min Price (₹)', 'minPrice']].map(([label, key]) => (
-                            <div key={key}>
-                                <label className="text-xs text-gray-500 mb-1 block">{label}</label>
-                                <input type="number" value={productForm[key]} onChange={e => setProductForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none" />
-                            </div>
-                        ))}
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-xs text-gray-500 mb-1 block">Stock</label>
-                            <input type="number" value={productForm.stock} onChange={e => setProductForm(f => ({ ...f, stock: +e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none" />
-                        </div>
-                        <div className="flex items-end pb-2">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={productForm.negotiable} onChange={e => setProductForm(f => ({ ...f, negotiable: e.target.checked }))} className="accent-primary" />
-                                <span className="text-sm">Negotiable</span>
-                            </label>
-                        </div>
-                    </div>
-                    <input value={productForm.tags} onChange={e => setProductForm(f => ({ ...f, tags: e.target.value }))} placeholder="Tags (comma separated): diwali, handmade, gift" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none" />
-                </div>
-                <div className="flex gap-2 mt-4">
-                    <button onClick={() => setProductModal(null)} className="flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium">Cancel</button>
-                    <button onClick={handleProductSave} className="flex-1 py-2 rounded-xl text-white text-sm font-bold" style={{ background: 'var(--btn-gradient)' }}>
-                        {productModal === 'add' ? 'Add Product' : 'Save Changes'}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+
 
     return (
         <div className="container py-6 pb-20 lg:pb-6">
@@ -331,7 +277,64 @@ const SellerDashboard = () => {
                 </div>
             )}
 
-            {productModal && <ProductFormModal />}
+            {productModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="font-bold text-lg">{productModal === 'add' ? 'Add New Product' : 'Edit Product'}</h3>
+                            <button onClick={() => setProductModal(null)}><X className="w-5 h-5 text-gray-400" /></button>
+                        </div>
+                        <div className="space-y-3">
+                            <input value={productForm.name} onChange={e => setProductForm(f => ({ ...f, name: e.target.value }))} placeholder="Product name *" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" />
+                            <textarea value={productForm.description} onChange={e => setProductForm(f => ({ ...f, description: e.target.value }))} placeholder="Description" rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none resize-none focus:border-primary" />
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-700 mb-1 block">Category</label>
+                                    <select value={productForm.category} onChange={e => setProductForm(f => ({ ...f, category: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary bg-white">
+                                        {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-700 mb-1 block">Festival</label>
+                                    <select value={productForm.festival} onChange={e => setProductForm(f => ({ ...f, festival: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary bg-white">
+                                        {FESTIVALS_LIST.map(f => <option key={f}>{f}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3">
+                                {[['MRP (₹)', 'mrp'], ['Selling Price (₹)', 'price'], ['Min Price (₹)', 'minPrice']].map(([label, key]) => (
+                                    <div key={key}>
+                                        <label className="text-xs font-semibold text-gray-700 mb-1 block">{label}</label>
+                                        <input type="number" value={productForm[key]} onChange={e => setProductForm(f => ({ ...f, [key]: e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" placeholder="0" />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-700 mb-1 block">Available Stock</label>
+                                    <input type="number" value={productForm.stock} onChange={e => setProductForm(f => ({ ...f, stock: +e.target.value }))} className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" placeholder="10" />
+                                </div>
+                                <div className="flex items-end pb-2">
+                                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded-xl hover:bg-gray-50 border border-transparent transition-colors">
+                                        <input type="checkbox" checked={productForm.negotiable} onChange={e => setProductForm(f => ({ ...f, negotiable: e.target.checked }))} className="w-4 h-4 accent-primary rounded cursor-pointer" />
+                                        <span className="text-sm font-semibold text-gray-700 select-none">Open to Negotiation</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-xs font-semibold text-gray-700 mb-1 block">Search Tags</label>
+                                <input value={productForm.tags} onChange={e => setProductForm(f => ({ ...f, tags: e.target.value }))} placeholder="E.g. diwali, handmade, gift (comma separated)" className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-primary" />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 mt-4">
+                            <button onClick={() => setProductModal(null)} className="flex-1 py-2 border border-gray-200 rounded-xl text-sm font-medium">Cancel</button>
+                            <button onClick={handleProductSave} className="flex-1 py-2 rounded-xl text-white text-sm font-bold" style={{ background: 'var(--btn-gradient)' }}>
+                                {productModal === 'add' ? 'Add Product' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

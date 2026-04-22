@@ -125,8 +125,9 @@ export const DataProvider = ({ children }) => {
     // ─── Wishlist ─────────────────────────────────────────────────────────────
     const fetchWishlist = useCallback(async (userId) => {
         try {
-            const data = await api.get(`/wishlist/${userId}`);
-            const ids = (data.items || data || []).map(item => item.productId || item);
+            const res = await api.get('/wishlist');
+            // Backend returns { success: true, products: [ "id1", "id2" ] } where products can be objects if populated
+            const ids = (res.products || []).map(item => typeof item === 'object' && item !== null ? (item._id || item.id) : item);
             setWishlists(prev => ({ ...prev, [userId]: ids }));
             return ids;
         } catch { return []; }
@@ -141,11 +142,8 @@ export const DataProvider = ({ children }) => {
             [userId]: isInList ? userList.filter(id => id !== productId) : [...userList, productId]
         }));
         try {
-            if (isInList) {
-                await api.delete(`/wishlist/${userId}/${productId}`);
-            } else {
-                await api.post(`/wishlist/${userId}`, { productId });
-            }
+            // Backend handles both add and remove via the /toggle endpoint
+            await api.post('/wishlist/toggle', { productId });
         } catch {
             // Revert
             setWishlists(prev => ({ ...prev, [userId]: userList }));
