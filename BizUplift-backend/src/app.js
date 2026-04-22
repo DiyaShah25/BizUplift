@@ -26,7 +26,11 @@ const app = express();
 
 // ─── Core Middleware ─────────────────────────────────────
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: [
+        process.env.FRONTEND_URL || 'http://localhost:5173',
+        'http://localhost:5174',  // Support Vite's alternate port
+        'http://localhost:3000',  // Support other common dev ports
+    ],
     credentials: true,
 }));
 app.use(express.json());
