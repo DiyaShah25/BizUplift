@@ -1,122 +1,71 @@
-# 🛍️ BizUplift — Festival Marketplace
+# 🛍️ BizUplift
 
-A production-ready Indian festival marketplace connecting local artisans with customers across India. Built with React + Vite, featuring AI-powered price negotiation, 10 dynamic festival themes, and three role-based dashboards.
+> **Elevate Your Business with BizUplift.**  
+> India's premier festival marketplace connecting authentic artisans to digital buyers safely, seamlessly, and stylishly.
 
----
-
-## ✨ Features
-
-### 🎨 10 Festival Themes
-Dynamic themes with canvas particle animations — switch between Diwali, Holi, Navratri, Eid, Christmas, Onam, Lohri, Pongal, Baisakhi, and Default. Every color, font, and animation updates instantly via CSS variables.
-
-### 🤖 AI Price Negotiation
-Negotiate prices directly on product pages using Claude AI. The AI seller speaks Hinglish, responds to quick offer buttons, and detects when a deal is reached — the negotiated price carries through to your cart.
-
-### 🛒 Full Shopping Flow
-Browse → Filter → Negotiate → Cart (with coupons & credit points) → Checkout (UPI/Card/COD) → Order Tracking
-
-### ⭐ Credit Points System
-Earn points on every purchase, review, community post, and referral. Redeem at checkout for discounts.
-
-### 🎁 Hamper Builder
-Build custom festival gift hampers — pick a theme, set a budget, add products, and personalize with a message.
-
-### 👥 Community Feed
-Share reviews, tips, and seller stories. 15+ seeded posts across all festivals.
+BizUplift is a comprehensive platform designed to empower local artisans during festival seasons. It features beautiful, animated interfaces, a secure role-based ecosystem, and intuitive dashboards to orchestrate transactions and community building.
 
 ---
 
-## 📄 Pages (17 Routes)
-
-| Page | Route |
-|------|-------|
-| Home | `/` |
-| Marketplace | `/marketplace` |
-| Product Detail | `/product/:id` |
-| Auth (Login/Register) | `/auth` |
-| Cart | `/cart` |
-| Checkout | `/checkout` |
-| Orders | `/orders` |
-| Wishlist | `/wishlist` |
-| Customer Dashboard | `/dashboard/customer` |
-| Seller Dashboard | `/dashboard/seller` |
-| Admin Dashboard | `/dashboard/admin` |
-| Community | `/community` |
-| Hamper Builder | `/hamper` |
-| Seller Profile | `/seller/:id` |
-| Credits | `/credits` |
-| Festivals | `/festivals` |
-| Collaborate (Seller Onboarding) | `/collaborate` |
+## ✨ Key Features
+- **Premium User Experience**: Crafted with modern dark/light themes (including a vibrant "Diwali mode"), glassmorphism, responsive split-screen layouts, and fluid motion animations using Framer Motion.
+- **Robust Authentication**: A fully gated platform requiring registration for deep access, featuring demo OTP login mechanisms and dynamic content-locking icons for unauthenticated guests.
+- **Role-Based Access Control**:
+  - **Customers**: Browse securely, manage profiles, and experience customized feeds.
+  - **Sellers**: Gain access to specialized dashboards to track inventory, insights, and engagement.
+  - **Admins**: Command-center dashboards to manage users, moderation, and overall structural integrity.
 
 ---
 
-## 🔐 Test Credentials
+## 🛠 Tech Stack
 
-| Role | Email | Password |
-|------|-------|----------|
-| Customer | `arjun@example.com` | `password123` |
-| Seller | `priya@kalakraft.com` | `seller123` |
-| Admin | `admin@bizuplift.com` | `admin123` |
+### Frontend Architecture
+- **React.js (Vite)** format for lightning-fast module replacement.
+- **TailwindCSS** for rapid, scalable, and atomic UI styling.
+- **Framer Motion** for bringing the interface to life through high-fidelity tab sliding, staggered entrance animations, and scalable micro-interactions.
+- **Lucide React** for ultra-clean, consistent vector typography and iconography.
+
+### Backend Infrastructure
+- **Node.js & Express.js** providing the foundational REST architecture.
+- **MongoDB** integrations for durable, persistent full-stack data handling.
 
 ---
 
 ## 🚀 Getting Started
 
+Follow these steps to replicate the robust development environment on your local machine.
+
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
+
+### 1. Clone the Repository
 ```bash
-# Install dependencies
+git clone https://github.com/DiyaShah25/BizUplift.git
+cd BizUplift
+```
+
+### 2. Ignite the Backend System
+Open a fresh terminal window to boot up the Express server:
+```bash
+cd BizUplift-backend
 npm install
-
-# Start dev server
 npm run dev
+```
+*(The backend typically defaults to bridging via port 5000.)*
 
-# Build for production
-npm run build
+### 3. Launch the Frontend Interface
+Open a completely separate terminal window to boot up the Vite React server:
+```bash
+cd BizUplift-main
+npm install
+npm run dev
 ```
 
----
-
-## 🛠️ Tech Stack
-
-| Layer | Tech |
-|-------|------|
-| Framework | React 19 + Vite |
-| Routing | React Router v6 |
-| Styling | Tailwind CSS + CSS Variables |
-| State | React Context API |
-| Charts | Recharts |
-| Icons | Lucide React |
-| AI | Anthropic Claude API |
-| Persistence | localStorage |
+### 4. Experience the Platform
+Finally, navigate to the local Vite host location in your browser:
+**[http://localhost:5173](http://localhost:5173)**
 
 ---
 
-## 📦 Data Seeded
-
-- **30 products** across 8 festivals
-- **4 sellers** with full stories & milestones
-- **9 users** (admin, customers, sellers)
-- **15 community posts**
-- **Sample orders** with timeline data
-
----
-
-## 🏗️ Project Structure
-
-```
-src/
-├── context/          # DataContext, AuthContext, CartContext, NotificationContext, ThemeContext
-├── components/
-│   ├── Layout/       # Navbar, Footer
-│   └── UI/           # ParticleLayer, ThemeSwitcher, ToastContainer, Badge, Card
-└── pages/            # 17 lazy-loaded page components
-```
-
----
-
-## 🤝 Contributing
-
-This project was built as a hackathon/portfolio project. PRs welcome!
-
----
-
-*Made with ❤️ for Indian festivals and local artisans*
+*This project is built and maintained as part of a Software Engineering group initiative focusing on user-centered, accessible, visually stunning marketplace architecture.*
