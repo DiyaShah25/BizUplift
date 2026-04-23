@@ -65,7 +65,7 @@ const Festivals = () => {
     return (
         <div className="container py-6 pb-20 lg:pb-6">
             <div className="text-center mb-10">
-                <h1 className="text-3xl font-heading font-bold mb-2">🎪 Festival Calendar</h1>
+                <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Festival Calendar</h1>
                 <p className="text-gray-500">Discover curated products for every Indian festival</p>
                 <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700 uppercase tracking-widest">
                     🤖 Website theme changes automatically as festivals approach

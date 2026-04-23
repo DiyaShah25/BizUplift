@@ -7,7 +7,7 @@ import { useData } from '../context/DataContext';
 import { useNotifications } from '../context/NotificationContext';
 
 const Cart = () => {
-    const { cartItems, itemCount, subtotal, couponAmount, creditsAmount, deliveryFee, total, appliedCredits, setAppliedCredits, couponCode, couponDiscount, removeFromCart, updateQuantity, applyCoupon } = useCart();
+    const { cartItems, itemCount, subtotal, platformFee, couponAmount, creditsAmount, deliveryFee, total, appliedCredits, setAppliedCredits, couponCode, couponDiscount, removeFromCart, updateQuantity, applyCoupon } = useCart();
     const { currentUser } = useAuth();
     const { getUserCredits } = useData();
     const { showToast } = useNotifications();
@@ -16,6 +16,12 @@ const Cart = () => {
     const [couponError, setCouponError] = useState('');
 
     const [userCredits, setUserCredits] = useState({ balance: 0 });
+
+    useEffect(() => {
+        if (currentUser && currentUser.role !== 'customer') {
+            navigate(currentUser.role === 'seller' ? '/dashboard/seller' : '/dashboard/admin');
+        }
+    }, [currentUser, navigate]);
 
     useEffect(() => {
         if (currentUser) {
@@ -31,10 +37,10 @@ const Cart = () => {
 
     const maxCreditsUsable = Math.min(userCredits.balance, Math.floor(subtotal * 0.1));
 
-    const handleCoupon = () => {
-        const result = applyCoupon(couponInput);
+    const handleCoupon = async () => {
+        const result = await applyCoupon(couponInput, currentUser);
         if (result.success) { showToast(`Coupon applied! ${result.discount}% off 🎉`); setCouponError(''); }
-        else { setCouponError('Invalid coupon code'); }
+        else { setCouponError(result.message || 'Invalid coupon code'); }
     };
 
     const handleCheckout = () => {
@@ -121,6 +127,7 @@ const Cart = () => {
                         <h3 className="font-bold mb-4">Order Summary</h3>
                         <div className="space-y-2 text-sm">
                             <div className="flex justify-between"><span className="text-gray-500">Subtotal ({itemCount} items)</span><span>₹{subtotal.toLocaleString()}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">Platform Fee (2%)</span><span>₹{platformFee.toLocaleString()}</span></div>
                             {couponAmount > 0 && <div className="flex justify-between text-green-600"><span>Coupon ({couponCode})</span><span>-₹{couponAmount}</span></div>}
                             {creditsAmount > 0 && <div className="flex justify-between text-green-600"><span>Credits Used</span><span>-₹{creditsAmount}</span></div>}
                             <div className="flex justify-between"><span className="text-gray-500">Delivery</span><span className={deliveryFee === 0 ? 'text-green-600 font-semibold' : ''}>{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span></div>

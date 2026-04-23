@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../utils/api';
 
 const CartContext = createContext();
 
@@ -57,26 +58,61 @@ export const CartProvider = ({ children }) => {
 
     const clearCart = () => persist([]);
 
-    const applyCoupon = (code) => {
+    const applyCoupon = async (code, currentUser) => {
+        const upperCode = code.toUpperCase();
         const coupons = { 'HOLI20': 20, 'DIWALI15': 15, 'NEWUSER10': 10, 'BIZUPLIFT': 5 };
-        if (coupons[code.toUpperCase()]) {
-            setCouponCode(code.toUpperCase());
-            setCouponDiscount(coupons[code.toUpperCase()]);
-            return { success: true, discount: coupons[code.toUpperCase()] };
+        if (coupons[upperCode]) {
+            if (upperCode === 'NEWUSER10') {
+                if (!currentUser) {
+                    return { success: false, message: 'Please login to use NEWUSER10.' };
+                }
+                try {
+                    const data = await api.get('/orders');
+                    const orders = Array.isArray(data) ? data : data.orders || [];
+                    if (orders.length > 0) {
+                        return { success: false, message: 'NEWUSER10 is only valid for your first order.' };
+                    }
+                } catch (err) {
+                    return { success: false, message: 'Failed to verify new user status.' };
+                }
+            }
+
+            const festivalDates = {
+                'HOLI': new Date(new Date().getFullYear(), 2, 3), // March 3
+                'DIWALI': new Date(new Date().getFullYear(), 10, 8) // Nov 8
+            };
+            
+            let festDate = null;
+            if (upperCode.startsWith('HOLI')) festDate = festivalDates['HOLI'];
+            else if (upperCode.startsWith('DIWALI')) festDate = festivalDates['DIWALI'];
+            
+            if (festDate) {
+                const now = new Date();
+                const diffTime = Math.abs(now - festDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays > 5) {
+                    return { success: false, message: 'This festival coupon is only valid within 5 days of the festival date.' };
+                }
+            }
+
+            setCouponCode(upperCode);
+            setCouponDiscount(coupons[upperCode]);
+            return { success: true, discount: coupons[upperCode] };
         }
-        return { success: false };
+        return { success: false, message: 'Invalid coupon code' };
     };
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const platformFee = Math.round(subtotal * 0.02);
     const couponAmount = Math.floor(subtotal * couponDiscount / 100);
     const creditsAmount = Math.min(appliedCredits, Math.floor(subtotal * 0.1)); // max 10% via credits
     const deliveryFee = subtotal > 999 ? 0 : 49;
-    const total = subtotal - couponAmount - creditsAmount + deliveryFee;
+    const total = subtotal + platformFee - couponAmount - creditsAmount + deliveryFee;
     const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
         <CartContext.Provider value={{
-            cartItems, itemCount, subtotal, couponAmount, creditsAmount, deliveryFee, total,
+            cartItems, itemCount, subtotal, platformFee, couponAmount, creditsAmount, deliveryFee, total,
             appliedCredits, setAppliedCredits, couponCode, couponDiscount,
             addToCart, removeFromCart, updateQuantity, clearCart, applyCoupon,
         }}>

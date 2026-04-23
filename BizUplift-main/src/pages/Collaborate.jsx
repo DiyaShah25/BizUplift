@@ -32,7 +32,7 @@ const Collaborate = () => {
             {/* Hero */}
             <div className="text-center py-12 mb-10 rounded-3xl" style={{ background: 'var(--btn-gradient)' }}>
                 <div className="text-5xl mb-4">🤝</div>
-                <h1 className="text-3xl font-heading font-bold text-white mb-3">Collaborate with BizUplift</h1>
+                <h1 className="text-5xl md:text-6xl font-bold text-white mb-5 tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Collaborate with BizUplift</h1>
                 <p className="text-white/80 max-w-xl mx-auto">Join 500+ local artisans and sellers who are growing their business with BizUplift's festival marketplace</p>
             </div>
 

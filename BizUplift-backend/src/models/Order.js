@@ -26,13 +26,19 @@ const orderSchema = new mongoose.Schema({
     total:         { type: Number, required: true },
     status:        {
         type: String,
-        enum: ['Processing', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled'],
+        enum: ['Processing', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Return Requested', 'Returned', 'Return Rejected'],
         default: 'Processing',
     },
     paymentMethod: { type: String, enum: ['UPI', 'Card', 'COD', 'NetBanking', 'Wallet'], default: 'COD' },
     address:       { type: addressSchema, required: true },
     creditsEarned: { type: Number, default: 0 },
     deliveredAt:   { type: Date, default: null },
+    razorpayOrderId:   { type: String, default: null },
+    razorpayPaymentId: { type: String, default: null },
+    razorpaySignature: { type: String, default: null },
+    isPaid:            { type: Boolean, default: false },
+    paidAt:            { type: Date, default: null },
+    platformFee:       { type: Number, default: 0 },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

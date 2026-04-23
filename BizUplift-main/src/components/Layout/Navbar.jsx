@@ -17,7 +17,7 @@ const Navbar = () => {
     const { currentUser, isAuthenticated, logout } = useAuth();
     const { itemCount } = useCart();
     const { getUserNotifications, getUnreadCount, markAllRead } = useNotifications();
-    const { products, fetchWishlist } = useData();
+    const { products } = useData();
     const navigate = useNavigate();
     const location = useLocation();
     const searchRef = useRef(null);
@@ -43,12 +43,6 @@ const Navbar = () => {
         return () => window.removeEventListener('keydown', handleKey);
     }, []);
 
-    useEffect(() => {
-        if (currentUser && currentUser.id) {
-            fetchWishlist(currentUser.id);
-        }
-    }, [currentUser, fetchWishlist]);
-
     useEffect(() => { setIsMenuOpen(false); setSearchOpen(false); }, [location]);
 
     const handleSearch = (e) => {
@@ -65,14 +59,28 @@ const Navbar = () => {
         return '/dashboard/customer';
     };
 
-    const navLinks = isAuthenticated ? [
-        { to: '/', label: 'Home' },
-        { to: '/marketplace', label: 'Marketplace' },
-        { to: '/festivals', label: 'Festivals' },
-        { to: '/hamper', label: 'Hampers' },
-        { to: '/community', label: 'Community' },
-        { to: '/collaborate', label: 'Collaborate' },
-    ] : [];
+    let navLinks = [];
+    if (isAuthenticated) {
+        if (currentUser?.role === 'seller') {
+            navLinks = [
+                { to: '/', label: 'Home' },
+                { to: '/marketplace', label: 'Marketplace' },
+                { to: '/seller-analytics', label: 'Analytics' },
+                { to: '/seller-subscription', label: 'Subscriptions' },
+                { to: '/community', label: 'Community' },
+                { to: '/collaborate', label: 'Collaborate' },
+            ];
+        } else {
+            navLinks = [
+                { to: '/', label: 'Home' },
+                { to: '/marketplace', label: 'Marketplace' },
+                { to: '/festivals', label: 'Festivals' },
+                { to: '/hamper', label: 'Hampers' },
+                { to: '/community', label: 'Community' },
+                { to: '/collaborate', label: 'Collaborate' },
+            ];
+        }
+    }
 
     return (
         <>
@@ -141,14 +149,16 @@ const Navbar = () => {
                                 <button onClick={() => setSearchOpen(true)} className="p-2 rounded-lg hover:bg-primary/10 transition-colors" style={{ color: mutedColor }}>
                                     <Search className="w-5 h-5" />
                                 </button>
-                                <Link to="/cart" className="relative p-2 rounded-lg hover:bg-primary/10 transition-colors" style={{ color: mutedColor }}>
-                                    <ShoppingBag className="w-5 h-5" />
-                                    {itemCount > 0 && (
-                                        <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: 'rgb(var(--color-primary))' }}>
-                                            {itemCount > 9 ? '9+' : itemCount}
-                                        </span>
-                                    )}
-                                </Link>
+                                {currentUser?.role === 'customer' && (
+                                    <Link to="/cart" className="relative p-2 rounded-lg hover:bg-primary/10 transition-colors" style={{ color: mutedColor }}>
+                                        <ShoppingBag className="w-5 h-5" />
+                                        {itemCount > 0 && (
+                                            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold text-white" style={{ background: 'rgb(var(--color-primary))' }}>
+                                                {itemCount > 9 ? '9+' : itemCount}
+                                            </span>
+                                        )}
+                                    </Link>
+                                )}
                             </>
                         )}
 
@@ -202,10 +212,10 @@ const Navbar = () => {
                                         </div>
                                         {[
                                             { to: getDashboardLink(), icon: <Settings className="w-4 h-4" />, label: 'Dashboard' },
-                                            { to: '/orders', icon: <Package className="w-4 h-4" />, label: 'My Orders' },
-                                            { to: '/wishlist', icon: <Heart className="w-4 h-4" />, label: 'Wishlist' },
-                                            { to: '/credits', icon: <Star className="w-4 h-4" />, label: 'Credit Points' },
-                                        ].map(item => (
+                                            { to: '/orders', icon: <Package className="w-4 h-4" />, label: 'My Orders', hideFor: ['seller', 'admin'] },
+                                            { to: '/wishlist', icon: <Heart className="w-4 h-4" />, label: 'Wishlist', hideFor: ['seller', 'admin'] },
+                                            { to: '/credits', icon: <Star className="w-4 h-4" />, label: 'Credit Points', hideFor: ['seller', 'admin'] },
+                                        ].filter(item => !item.hideFor?.includes(currentUser.role)).map(item => (
                                             <Link key={item.to} to={item.to} onClick={() => setUserMenuOpen(false)}
                                                 className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-primary/5 transition-colors" style={{ color: textColor }}>
                                                 {item.icon} {item.label}

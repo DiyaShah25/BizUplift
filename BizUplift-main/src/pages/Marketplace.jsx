@@ -8,7 +8,7 @@ import ProductCard from '../components/UI/ProductCard';
 import LoadingSpinner from '../components/UI/LoadingSpinner';
 
 const CATEGORIES = ['All', 'Handicrafts', 'Food & Sweets', 'Clothing', 'Decoration', 'Jewelry', 'Candles & Diyas', 'Pottery'];
-const FESTIVALS_LIST = ['All', 'Diwali', 'Holi', 'Navratri', 'Eid', 'Christmas', 'Pongal', 'Onam', 'Lohri'];
+const FESTIVALS_LIST = ['All', 'Lohri', 'Pongal', 'Holi', 'Eid', 'Onam', 'Raksha Bandhan', 'Navratri', 'Dussehra', 'Diwali', 'Christmas'];
 const SORT_OPTIONS = [
     { value: 'newest', label: 'Newest First' },
     { value: 'price_asc', label: 'Price: Low to High' },
@@ -25,7 +25,7 @@ const Marketplace = () => {
     // Filter States
     const [search, setSearch] = useState(searchParams.get('search') || '');
     const [category, setCategory] = useState('All');
-    const [festival, setFestival] = useState('All');
+    const [festival, setFestival] = useState(searchParams.get('festival') || 'All');
     const [priceRange, setPriceRange] = useState([0, 10000]);
     const [minRating, setMinRating] = useState(0);
     const [sortBy, setSortBy] = useState('newest');
@@ -37,13 +37,22 @@ const Marketplace = () => {
     const [page, setPage] = useState(1);
     const PER_PAGE = 20;
 
-    useEffect(() => { setSearch(searchParams.get('search') || ''); }, [searchParams]);
+    useEffect(() => { 
+        setSearch(searchParams.get('search') || ''); 
+        if (searchParams.get('festival')) setFestival(searchParams.get('festival'));
+    }, [searchParams]);
 
     const filtered = useMemo(() => {
         let result = [...products];
         if (search) result = result.filter(p => p.name.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()) || p.sellerName.toLowerCase().includes(search.toLowerCase()));
         if (category !== 'All') result = result.filter(p => p.category === category);
-        if (festival !== 'All') result = result.filter(p => p.festival === festival || p.festival === 'All');
+        if (festival !== 'All') {
+            result = result.filter(p => 
+                p.festival === 'All' || 
+                p.festival.toLowerCase() === festival.toLowerCase() ||
+                (festival === 'Raksha Bandhan' && p.festival.toLowerCase() === 'rakhi')
+            );
+        }
         result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
         if (minRating > 0) result = result.filter(p => p.rating >= minRating);
         if (inStockOnly) result = result.filter(p => p.stock > 0);
@@ -86,7 +95,7 @@ const Marketplace = () => {
                     
                     {/* Top Row: Title, Search, Actions */}
                     <div className="flex flex-col md:flex-row md:items-center gap-4 justify-between">
-                        <h1 className="text-2xl lg:text-3xl font-heading font-bold text-gray-900 flex-shrink-0 flex items-baseline gap-2">
+                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 flex-shrink-0 flex items-baseline gap-2 tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>
                             Marketplace <span className="text-sm font-body font-medium text-gray-500">({filtered.length})</span>
                         </h1>
                         
@@ -289,8 +298,8 @@ const Marketplace = () => {
                                 >
                                     <ProductCard 
                                         product={p}
-                                        isWishlisted={currentUser ? isWishlisted(currentUser.id, p.id) : false}
-                                        onWishlist={(id) => currentUser ? toggleWishlist(currentUser.id, id) : null}
+                                        isWishlisted={isWishlisted(p.id)}
+                                        onWishlist={toggleWishlist}
                                     />
                                 </motion.div>
                             ))}

@@ -42,3 +42,5 @@ coverage/
 *.bak
 *.tmp
 .cache/
+*.exe
+*.zip

@@ -28,7 +28,7 @@ const Confetti = () => {
 };
 
 const Checkout = () => {
-    const { cartItems, total, subtotal, couponAmount, creditsAmount, deliveryFee, clearCart } = useCart();
+    const { cartItems, total, subtotal, platformFee, couponAmount, creditsAmount, deliveryFee, clearCart } = useCart();
     const { currentUser } = useAuth();
     const { addOrder, addNotification, addCredits, redeemCredits } = useData();
     const { showToast, addNotification: addNotif } = useNotifications();
@@ -41,32 +41,153 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [orderId, setOrderId] = useState('');
     const [showConfetti, setShowConfetti] = useState(false);
+    const [savedAddresses, setSavedAddresses] = useState([]);
+    const [selectedAddressId, setSelectedAddressId] = useState('');
+
+    useEffect(() => {
+        const saved = localStorage.getItem('user_addresses');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            setSavedAddresses(parsed);
+            // Auto-select default or first address
+            const defaultAddr = parsed.find(a => a.isDefault) || parsed[0];
+            if (defaultAddr) {
+                setSelectedAddressId(defaultAddr.id);
+                setAddress({
+                    name: defaultAddr.name,
+                    line1: defaultAddr.line1,
+                    city: defaultAddr.city,
+                    state: defaultAddr.state,
+                    pincode: defaultAddr.pincode,
+                    phone: defaultAddr.phone
+                });
+            }
+        }
+    }, []);
+
+    const handleSelectSavedAddress = (addr) => {
+        setSelectedAddressId(addr.id);
+        setAddress({
+            name: addr.name,
+            line1: addr.line1,
+            city: addr.city,
+            state: addr.state,
+            pincode: addr.pincode,
+            phone: addr.phone
+        });
+    };
 
     const STATES = ['Andhra Pradesh', 'Delhi', 'Gujarat', 'Karnataka', 'Kerala', 'Maharashtra', 'Punjab', 'Rajasthan', 'Tamil Nadu', 'Uttar Pradesh', 'West Bengal'];
 
     const handlePlaceOrder = async () => {
         setLoading(true);
-        await new Promise(r => setTimeout(r, 1500)); // simulate processing
-        const order = await addOrder({ customerId: currentUser.id, items: cartItems.map(i => ({ productId: i.productId, name: i.name, quantity: i.quantity, price: i.price, image: i.image })), total, paymentMethod, address });
-        
-        // Deduct spent credits
-        if (creditsAmount > 0) {
-            await redeemCredits(creditsAmount);
+        try {
+            // For COD, use the old flow
+            if (paymentMethod === 'COD') {
+                await new Promise(r => setTimeout(r, 1500)); // simulate processing
+                const order = await addOrder({ 
+                    customerId: currentUser.id, 
+                    items: cartItems.map(i => ({ productId: i.productId, name: i.name, quantity: i.quantity, price: i.price, image: i.image })), 
+                    total, 
+                    paymentMethod, 
+                    address 
+                });
+                
+                // Deduct spent credits
+                if (creditsAmount > 0) {
+                    await redeemCredits(creditsAmount);
+                }
+                
+                // Add newly earned credits is now handled strictly by the backend in orderController.js
+                setOrderId(order.id || order._id);
+                clearCart();
+                setShowConfetti(true);
+                setStep(3);
+                showToast('Order placed successfully! 🎉');
+            } else {
+                // Razorpay Online Flow
+                const response = await fetch('/api/orders/razorpay', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('bizuplift_token')}`
+                    },
+                    body: JSON.stringify({ amount: total, currency: 'INR' })
+                });
+                const { razorpayOrder } = await response.json();
+
+                const options = {
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Should be provided by user
+                    amount: razorpayOrder.amount,
+                    currency: razorpayOrder.currency,
+                    name: 'BizUplift',
+                    description: 'Festival Marketplace Purchase',
+                    order_id: razorpayOrder.id,
+                    handler: async function (response) {
+                        // Verify payment signature
+                        setLoading(true);
+                        const verifyRes = await fetch('/api/orders/verify', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('bizuplift_token')}`
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                orderDetails: {
+                                    items: cartItems.map(i => ({ productId: i.productId, name: i.name, quantity: i.quantity, price: i.price, image: i.image })),
+                                    total,
+                                    address,
+                                    paymentMethod
+                                }
+                            })
+                        });
+                        const verifyJson = await verifyRes.json();
+                        
+                        if (verifyJson.success) {
+                            // Deduct spent credits
+                            if (creditsAmount > 0) await redeemCredits(creditsAmount);
+                            
+                            setOrderId(verifyJson.order._id);
+                            clearCart();
+                            setShowConfetti(true);
+                            setStep(3);
+                            showToast('Payment successful & Order placed! 💳');
+                            addNotif(currentUser.id, { 
+                                type: 'order', 
+                                title: 'Payment Success!', 
+                                body: `Your order ${verifyJson.order._id} has been confirmed. Thank you for shopping!` 
+                            });
+                        } else {
+                            showToast('Payment verification failed', 'error');
+                        }
+                        setLoading(false);
+                    },
+                    prefill: {
+                        name: address.name,
+                        contact: address.phone,
+                        email: currentUser.email
+                    },
+                    theme: { color: '#FF6B00' },
+                    modal: {
+                        ondismiss: function() {
+                            setLoading(false);
+                            showToast('Payment cancelled', 'info');
+                        }
+                    }
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.open();
+            }
+        } catch (error) {
+            console.error('Order error:', error);
+            showToast('Something went wrong. Please try again.', 'error');
+        } finally {
+            if (paymentMethod === 'COD') setLoading(false);
         }
-        
-        // Add newly earned credits (10% of total)
-        const earnedPoints = Math.floor(total / 10);
-        if (earnedPoints > 0) {
-            await addCredits(currentUser.id, earnedPoints, `Earned from Order ${order?.id || ''}`);
-        }
-        setOrderId(order.id);
-        clearCart();
-        setShowConfetti(true);
-        setStep(3);
-        showToast('Order placed successfully! 🎉');
-        addNotif(currentUser.id, { type: 'order', title: 'Order Placed!', body: `Your order ${order.id} has been placed. Estimated delivery: 4-6 days.` });
-        setTimeout(() => setShowConfetti(false), 4000);
-        setLoading(false);
     };
 
     if (!currentUser) { navigate('/auth'); return null; }
@@ -93,8 +214,45 @@ const Checkout = () => {
 
             {/* Step 1: Address */}
             {step === 1 && (
-                <div className="festival-card rounded-2xl p-6">
-                    <h2 className="font-bold text-xl mb-6">Delivery Address</h2>
+                <div className="space-y-6">
+                    {savedAddresses.length > 0 && (
+                        <div className="animate-fade-in">
+                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 px-1">Select Saved Address</h3>
+                            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                                {savedAddresses.map(addr => (
+                                    <button 
+                                        key={addr.id}
+                                        onClick={() => handleSelectSavedAddress(addr)}
+                                        className={`flex-shrink-0 w-64 p-4 rounded-2xl border-2 text-left transition-all ${selectedAddressId === addr.id ? 'border-primary bg-primary/[0.02] shadow-lg shadow-primary/10' : 'border-gray-100 bg-white opacity-60 hover:opacity-100'}`}
+                                        style={selectedAddressId === addr.id ? { borderColor: 'rgb(var(--color-primary))' } : {}}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <span className="text-[10px] font-black uppercase tracking-tighter px-2 py-0.5 rounded bg-gray-100">{addr.label}</span>
+                                            {selectedAddressId === addr.id && <Check className="w-4 h-4 text-primary" />}
+                                        </div>
+                                        <p className="text-sm font-bold text-gray-800 truncate">{addr.name}</p>
+                                        <p className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed">{addr.line1}, {addr.city}</p>
+                                        <p className="text-[10px] font-semibold text-gray-400 mt-2">📞 {addr.phone}</p>
+                                    </button>
+                                ))}
+                                <button 
+                                    onClick={() => { setSelectedAddressId('new'); setAddress({ name: '', line1: '', city: '', state: '', pincode: '', phone: '' }); }}
+                                    className={`flex-shrink-0 w-40 p-4 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2 text-gray-400 hover:text-primary hover:border-primary transition-all ${selectedAddressId === 'new' ? 'border-primary bg-primary/[0.02] text-primary' : 'border-gray-200 bg-white/50'}`}
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">+</div>
+                                    <span className="text-xs font-bold">New Address</span>
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="festival-card rounded-2xl p-6 shadow-xl relative overflow-hidden">
+                        {/* Decorative background for the active address form */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[100%] pointer-events-none" />
+                        
+                        <h2 className="font-bold text-xl mb-6 relative">
+                            {selectedAddressId === 'new' ? 'New Delivery Address' : 'Confirm Delivery Details'}
+                        </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
                             { label: 'Full Name', key: 'name', placeholder: 'Arjun Mehta' },
@@ -120,7 +278,8 @@ const Checkout = () => {
                         Continue to Payment
                     </button>
                 </div>
-            )}
+            </div>
+        )}
 
             {/* Step 2: Payment */}
             {step === 2 && (
@@ -157,6 +316,7 @@ const Checkout = () => {
                         <h3 className="font-bold mb-3">Order Summary</h3>
                         <div className="space-y-1 text-sm">
                             <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>₹{subtotal.toLocaleString()}</span></div>
+                            <div className="flex justify-between"><span className="text-gray-500">Platform Fee (2%)</span><span>₹{platformFee.toLocaleString()}</span></div>
                             {couponAmount > 0 && <div className="flex justify-between text-green-600"><span>Coupon</span><span>-₹{couponAmount}</span></div>}
                             {creditsAmount > 0 && <div className="flex justify-between text-green-600"><span>Credits</span><span>-₹{creditsAmount}</span></div>}
                             <div className="flex justify-between"><span className="text-gray-500">Delivery</span><span>{deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span></div>

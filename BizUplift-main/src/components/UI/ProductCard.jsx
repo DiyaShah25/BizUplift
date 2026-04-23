@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { Star, ShoppingBag, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '../../context/NotificationContext';
 
 const ProductCard = ({ product, isWishlisted, onWishlist }) => {
     const { addToCart } = useCart();
+    const { currentUser } = useAuth();
     const { showToast } = useNotifications();
     const [added, setAdded] = useState(false);
 
@@ -59,14 +61,16 @@ const ProductCard = ({ product, isWishlisted, onWishlist }) => {
 
                 {/* Right Top Area (Negotiable / Wishlist) */}
                 <div className="absolute top-3 right-3 flex flex-col gap-2 items-end z-10">
-                    <motion.button 
-                        whileHover={{ scale: 1.15 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={(e) => { e.preventDefault(); onWishlist(product.id); }}
-                        className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-colors ${isWishlisted ? 'bg-red-50 border border-red-100' : 'bg-white/90 border border-white hover:bg-white'}`}
-                    >
-                        <Heart className={`w-4 h-4 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'}`} />
-                    </motion.button>
+                    {currentUser?.role === 'customer' && (
+                        <motion.button 
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={(e) => { e.preventDefault(); onWishlist(product.id); }}
+                            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md transition-colors ${isWishlisted ? 'bg-red-50 border border-red-100' : 'bg-white/90 border border-white hover:bg-white'}`}
+                        >
+                            <Heart className={`w-4 h-4 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-400 hover:text-red-500'}`} />
+                        </motion.button>
+                    )}
 
                     {product.negotiable && (
                         <span className="bg-emerald-50/90 text-emerald-600 border border-emerald-200 rounded-full px-2.5 py-1 text-[10px] uppercase font-bold tracking-wider shadow-sm flex items-center gap-1 backdrop-blur-md">
@@ -119,29 +123,31 @@ const ProductCard = ({ product, isWishlisted, onWishlist }) => {
                             </span>
                         </div>
 
-                        <motion.button 
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handleAdd}
-                            className={`relative overflow-hidden group/btn flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-md ${added ? 'bg-emerald-500 shadow-emerald-500/20' : 'shadow-primary/20'}`}
-                            style={added ? {} : { background: 'var(--btn-gradient)' }}
-                        >
-                            {added ? (
-                                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1">
-                                    ✓ Added
-                                </motion.span>
-                            ) : (
-                                <>
-                                    <ShoppingBag className="w-4 h-4 transition-transform group-hover/btn:-translate-y-0.5" /> 
-                                    <span>Add</span>
-                                </>
-                            )}
-                            
-                            {/* Shimmer effect on hover */}
-                            {!added && (
-                                <div className="absolute inset-0 -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
-                            )}
-                        </motion.button>
+                        {currentUser?.role === 'customer' && (
+                            <motion.button 
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleAdd}
+                                className={`relative overflow-hidden group/btn flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-white text-xs font-bold transition-all shadow-md ${added ? 'bg-emerald-500 shadow-emerald-500/20' : 'shadow-primary/20'}`}
+                                style={added ? {} : { background: 'var(--btn-gradient)' }}
+                            >
+                                {added ? (
+                                    <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="flex items-center gap-1">
+                                        ✓ Added
+                                    </motion.span>
+                                ) : (
+                                    <>
+                                        <ShoppingBag className="w-4 h-4 transition-transform group-hover/btn:-translate-y-0.5" /> 
+                                        <span>Add</span>
+                                    </>
+                                )}
+                                
+                                {/* Shimmer effect on hover */}
+                                {!added && (
+                                    <div className="absolute inset-0 -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                                )}
+                            </motion.button>
+                        )}
                     </div>
                 </div>
             </div>

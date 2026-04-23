@@ -272,7 +272,7 @@ const NegotiationChat = ({ product, seller, onClose, onDeal }) => {
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { products, sellers, getProductReviews, isWishlisted, toggleWishlist, addReview, isDataLoading } = useData();
+    const { products, sellers, getProductReviews, fetchProductReviews, isWishlisted, toggleWishlist, addReview, isDataLoading } = useData();
     const { addToCart } = useCart();
     const { currentUser } = useAuth();
     const { showToast } = useNotifications();
@@ -292,7 +292,13 @@ const ProductDetail = () => {
     const product = products.find(p => p.id === id);
     const seller = product ? sellers.find(s => s.id === (typeof product.sellerId === 'object' ? (product.sellerId?._id || product.sellerId?.id) : product.sellerId)) : null;
     const reviews = product ? getProductReviews(product.id) : [];
-    const wishlisted = currentUser && product ? isWishlisted(currentUser.id, product.id) : false;
+    const wishlisted = product ? isWishlisted(product.id) : false;
+
+    useEffect(() => {
+        if (product) {
+            fetchProductReviews(product.id);
+        }
+    }, [product?.id, fetchProductReviews]);
 
     if (isDataLoading) return <LoadingSpinner fullPage />;
 
@@ -361,12 +367,14 @@ const ProductDetail = () => {
                                 🤝 Negotiated
                             </div>
                         )}
-                        <button
-                            onClick={() => currentUser ? toggleWishlist(currentUser.id, product.id) : navigate('/auth')}
-                            className={`absolute top-4 right-4 p-3 rounded-full shadow-lg backdrop-blur-md transition-all hover:scale-110 border ${wishlisted ? 'border-red-200 bg-red-50 text-red-500' : 'border-gray-200 bg-white text-gray-400'}`}
-                        >
-                            <Heart className={`w-5 h-5 ${wishlisted ? 'fill-red-500' : ''}`} />
-                        </button>
+                        {currentUser?.role === 'customer' && (
+                            <button
+                                onClick={() => currentUser ? toggleWishlist(product.id) : navigate('/auth')}
+                                className={`absolute top-4 right-4 p-3 rounded-full shadow-lg backdrop-blur-md transition-all hover:scale-110 border ${wishlisted ? 'border-red-200 bg-red-50 text-red-500' : 'border-gray-200 bg-white text-gray-400'}`}
+                            >
+                                <Heart className={`w-5 h-5 ${wishlisted ? 'fill-red-500' : ''}`} />
+                            </button>
+                        )}
                     </div>
 
                     {/* Thumbnails */}
@@ -382,23 +390,24 @@ const ProductDetail = () => {
                         ))}
                     </div>
 
-                    {/* Desktop Action Buttons */}
-                    <div className="hidden lg:flex gap-4 mt-6">
-                        <button
-                            onClick={handleAddToCart}
-                            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-sm font-bold bg-[#ff9f00] hover:bg-[#ff9000] text-white text-lg transition-colors shadow-sm"
-                        >
-                            <ShoppingBag className="w-5 h-5 fill-white" /> ADD TO CART
-                        </button>
-                        {product.negotiable && (
+                    {currentUser?.role === 'customer' && (
+                        <div className="hidden lg:flex gap-4 mt-6">
                             <button
-                                onClick={() => setChatOpen(true)}
-                                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-sm font-bold bg-[#fb641b] hover:bg-[#f35b12] text-white text-lg transition-colors shadow-sm"
+                                onClick={handleAddToCart}
+                                className="flex-1 flex items-center justify-center gap-2 py-4 rounded-sm font-bold bg-[#ff9f00] hover:bg-[#ff9000] text-white text-lg transition-colors shadow-sm"
                             >
-                                <MessageCircle className="w-5 h-5" /> NEGOTIATE
+                                <ShoppingBag className="w-5 h-5 fill-white" /> ADD TO CART
                             </button>
-                        )}
-                    </div>
+                            {product.negotiable && (
+                                <button
+                                    onClick={() => setChatOpen(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 py-4 rounded-sm font-bold bg-[#fb641b] hover:bg-[#f35b12] text-white text-lg transition-colors shadow-sm"
+                                >
+                                    <MessageCircle className="w-5 h-5" /> NEGOTIATE
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* RIGHT: Scrollable Details */}
@@ -582,23 +591,24 @@ const ProductDetail = () => {
                     </div>
                 </div>
 
-                {/* Mobile Action Buttons (Sticky Bottom) */}
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 z-40 flex shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-                    <button
-                        onClick={handleAddToCart}
-                        className="flex-1 py-3.5 mx-1 font-bold bg-[#ff9f00] text-white text-sm"
-                    >
-                        ADD TO CART
-                    </button>
-                    {product.negotiable && (
+                {currentUser?.role === 'customer' && (
+                    <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 z-40 flex shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
                         <button
-                            onClick={() => setChatOpen(true)}
-                            className="flex-1 py-3.5 mx-1 font-bold bg-[#fb641b] text-white text-sm"
+                            onClick={handleAddToCart}
+                            className="flex-1 py-3.5 mx-1 font-bold bg-[#ff9f00] text-white text-sm"
                         >
-                            NEGOTIATE
+                            ADD TO CART
                         </button>
-                    )}
-                </div>
+                        {product.negotiable && (
+                            <button
+                                onClick={() => setChatOpen(true)}
+                                className="flex-1 py-3.5 mx-1 font-bold bg-[#fb641b] text-white text-sm"
+                            >
+                                NEGOTIATE
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
 
             {chatOpen && <NegotiationChat product={product} seller={seller} onClose={() => setChatOpen(false)} onDeal={handleDeal} />}

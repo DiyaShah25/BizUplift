@@ -29,6 +29,8 @@ const Festivals = lazy(() => import('./pages/Festivals'));
 const Collaborate = lazy(() => import('./pages/Collaborate'));
 const CustomerDashboard = lazy(() => import('./pages/CustomerDashboard'));
 const SellerDashboard = lazy(() => import('./pages/SellerDashboard'));
+const SellerAnalytics = lazy(() => import('./pages/SellerAnalytics'));
+const SellerSubscription = lazy(() => import('./pages/SellerSubscription'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 
 const ScrollToTop = () => {
@@ -53,8 +55,8 @@ const PageLoader = () => (
 function App() {
   return (
     <ThemeProvider>
-      <DataProvider>
-        <AuthProvider>
+      <AuthProvider>
+        <DataProvider>
           <CartProvider>
             <NotificationProvider>
               <Router>
@@ -86,6 +88,8 @@ function App() {
                         <Route path="/collaborate" element={<ProtectedRoute><Collaborate /></ProtectedRoute>} />
                         <Route path="/dashboard/customer" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
                         <Route path="/dashboard/seller" element={<ProtectedRoute><SellerDashboard /></ProtectedRoute>} />
+                        <Route path="/seller-analytics" element={<ProtectedRoute><SellerAnalytics /></ProtectedRoute>} />
+                        <Route path="/seller-subscription" element={<ProtectedRoute><SellerSubscription /></ProtectedRoute>} />
                         <Route path="/dashboard/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
                         <Route path="*" element={
                           <div className="container py-20 text-center">
@@ -105,8 +109,8 @@ function App() {
               </Router>
             </NotificationProvider>
           </CartProvider>
-        </AuthProvider>
-      </DataProvider>
+        </DataProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -18,16 +18,44 @@ const AdminDashboard = () => {
 
     if (!currentUser || currentUser.role !== 'admin') { navigate('/'); return null; }
 
+    const totalPlatformFee = orders.reduce((s, o) => s + (o.platformFee || o.total * 0.02), 0);
+
     const stats = [
         { label: 'Total Users', value: users.length, icon: '👥', color: '#7C3AED' },
         { label: 'Total Products', value: products.length, icon: '📦', color: '#E85D04' },
         { label: 'Total Orders', value: orders.length, icon: '🛒', color: '#06D6A0' },
-        { label: 'Total Revenue', value: `₹${orders.reduce((s, o) => s + o.total, 0).toLocaleString()}`, icon: '💰', color: '#FFD700' },
+        { label: 'Platform Revenue', value: `₹${Math.round(totalPlatformFee).toLocaleString()}`, icon: '💰', color: '#FFD700' },
     ];
 
-    const revenueData = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'].map(month => ({
-        month, revenue: Math.floor(Math.random() * 50000) + 20000, orders: Math.floor(Math.random() * 100) + 30,
-    }));
+    const getMonthName = (dateStr) => {
+        const date = new Date(dateStr);
+        return date.toLocaleString('en-IN', { month: 'short' });
+    };
+
+    const monthlyData = {};
+    orders.forEach(order => {
+        const dateStr = order.createdAt || order.paidAt || Date.now();
+        const month = getMonthName(dateStr);
+        const fee = order.platformFee || (order.total * 0.02) || 0;
+
+        if (!monthlyData[month]) {
+            monthlyData[month] = { month, revenue: 0, orders: 0, timestamp: new Date(dateStr).getTime() };
+        }
+        monthlyData[month].revenue += fee;
+        monthlyData[month].orders += 1;
+    });
+
+    let revenueData = Object.values(monthlyData)
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .map(d => ({ ...d, revenue: Math.round(d.revenue) }));
+
+    if (revenueData.length === 0) {
+        const d = new Date();
+        for (let i = 5; i >= 0; i--) {
+            const m = new Date(d.getFullYear(), d.getMonth() - i, 1).toLocaleString('en-IN', { month: 'short' });
+            revenueData.push({ month: m, revenue: 0, orders: 0 });
+        }
+    }
 
     const TABS = [
         { id: 'overview', label: '📊 Overview' },
@@ -78,7 +106,7 @@ const AdminDashboard = () => {
                             <BarChart data={revenueData}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`} />
+                                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => v >= 1000 ? `₹${(v / 1000).toFixed(1)}k` : `₹${v}`} width={60} />
                                 <Tooltip formatter={v => [`₹${v.toLocaleString()}`, 'Revenue']} />
                                 <Bar dataKey="revenue" fill="rgb(var(--color-primary))" radius={[4, 4, 0, 0]} />
                             </BarChart>

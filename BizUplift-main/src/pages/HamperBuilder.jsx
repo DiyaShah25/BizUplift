@@ -5,10 +5,16 @@ import { useCart } from '../context/CartContext';
 import { useNotifications } from '../context/NotificationContext';
 
 const HAMPER_THEMES = [
-    { id: 'diwali', name: 'Diwali Hamper', emoji: '🪔', color: '#FFD700', desc: 'Diyas, sweets & decor' },
-    { id: 'holi', name: 'Holi Hamper', emoji: '🎨', color: '#FF006E', desc: 'Colors, gulal & gifts' },
-    { id: 'wedding', name: 'Wedding Hamper', emoji: '💍', color: '#E85D04', desc: 'Traditional & premium' },
-    { id: 'corporate', name: 'Corporate Gift', emoji: '🎁', color: '#7C3AED', desc: 'Professional & elegant' },
+    { id: 'diwali', name: 'Diwali Fest', emoji: '🪔', color: '#FF9F1C', desc: 'Diyas, sweets & decor' },
+    { id: 'holi', name: 'Holi Colors', emoji: '🎨', color: '#FF006E', desc: 'Colors, gulal & joy' },
+    { id: 'rakhi', name: 'Rakhi Special', emoji: '🎀', color: '#E91E8C', desc: 'Sweets & sibling love' },
+    { id: 'wedding', name: 'Wedding Luxe', emoji: '💍', color: '#E85D04', desc: 'Traditional & premium' },
+    { id: 'birthday', name: 'Birthday Bash', emoji: '🎂', color: '#8338EC', desc: 'Fun, festive & sweet' },
+    { id: 'corporate', name: 'Corporate Pro', emoji: '🤝', color: '#3A86FF', desc: 'Elegant & professional' },
+    { id: 'wellness', name: 'Self-Care Spa', emoji: '🌿', color: '#2A9D8F', desc: 'Relaxation & calm' },
+    { id: 'housewarming', name: 'New Home', emoji: '🏡', color: '#F4A261', desc: 'Decor & warmth' },
+    { id: 'romance', name: 'Date Night', emoji: '🌹', color: '#D90429', desc: 'Love & sweet treats' },
+    { id: 'eco', name: 'Eco Green', emoji: '🌱', color: '#4CAF50', desc: 'Sustainable crafts' },
 ];
 
 const HamperBuilder = () => {
@@ -21,7 +27,26 @@ const HamperBuilder = () => {
     const [personalMessage, setPersonalMessage] = useState('');
     const [budget, setBudget] = useState(2000);
 
-    const suggestedProducts = products.filter(p => p.festival.toLowerCase() === selectedTheme.id || p.festival === 'All').slice(0, 8);
+    let baseProducts = products.filter(p => p.festival && p.festival.toLowerCase() === selectedTheme.id);
+    if (baseProducts.length < 4) {
+        let extra = [];
+        if (selectedTheme.id === 'wedding') extra = products.filter(p => p.category === 'Jewelry' || p.category === 'Clothing');
+        if (selectedTheme.id === 'corporate') extra = products.filter(p => p.category === 'Handicrafts' || p.category === 'Pottery');
+        if (selectedTheme.id === 'birthday') extra = products.filter(p => p.category === 'Food & Sweets' || p.category === 'Decoration');
+        if (selectedTheme.id === 'wellness') extra = products.filter(p => p.category === 'Candles & Diyas' || p.category === 'Pottery');
+        if (selectedTheme.id === 'housewarming') extra = products.filter(p => p.category === 'Decoration' || p.category === 'Pottery' || p.category === 'Candles & Diyas');
+        if (selectedTheme.id === 'romance') extra = products.filter(p => p.category === 'Jewelry' || p.category === 'Food & Sweets' || p.category === 'Candles & Diyas');
+        if (selectedTheme.id === 'eco') extra = products.filter(p => p.category === 'Handicrafts' || p.category === 'Pottery');
+        
+        baseProducts = [...baseProducts, ...extra];
+    }
+    
+    // Fallback to 'All' festival items and remove duplicates
+    const allItems = [...baseProducts, ...products.filter(p => p.festival === 'All')];
+    const uniqueProducts = Array.from(new Set(allItems.map(p => p.id)))
+        .map(id => allItems.find(p => p.id === id));
+        
+    const suggestedProducts = uniqueProducts.slice(0, 8);
     const hamperTotal = hamperItems.reduce((s, item) => s + item.price * item.qty, 0);
 
     const addToHamper = (product) => {
@@ -47,7 +72,7 @@ const HamperBuilder = () => {
     return (
         <div className="container py-6 pb-20 lg:pb-6">
             <div className="text-center mb-8">
-                <h1 className="text-3xl font-heading font-bold mb-2">🎁 Hamper Builder</h1>
+                <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-5 tracking-tight" style={{ fontFamily: 'Inter, sans-serif' }}>Hamper Builder</h1>
                 <p className="text-gray-500">Create the perfect festival gift hamper for your loved ones</p>
             </div>
 
@@ -55,43 +80,103 @@ const HamperBuilder = () => {
                 {/* Builder Panel */}
                 <div className="lg:col-span-2 space-y-6">
                     {/* Theme Selection */}
-                    <div className="festival-card rounded-2xl p-5">
-                        <h2 className="font-bold mb-3">1. Choose Hamper Theme</h2>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {HAMPER_THEMES.map(theme => (
-                                <button key={theme.id} onClick={() => setSelectedTheme(theme)} className={`p-3 rounded-xl border-2 text-center transition-all ${selectedTheme.id === theme.id ? 'border-primary scale-105' : 'border-gray-200'}`} style={selectedTheme.id === theme.id ? { borderColor: theme.color, background: `${theme.color}15` } : {}}>
-                                    <div className="text-2xl mb-1">{theme.emoji}</div>
-                                    <div className="text-xs font-bold">{theme.name}</div>
-                                    <div className="text-xs text-gray-500">{theme.desc}</div>
-                                </button>
-                            ))}
+                    <div className="festival-card rounded-2xl p-6 border border-gray-100 shadow-sm bg-white overflow-hidden">
+                        <h2 className="font-bold mb-4 flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">1</span> 
+                            Choose Hamper Theme
+                        </h2>
+                        
+                        {/* Unique Horizontal Arch Cards */}
+                        <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-4 pt-2 -mx-2 px-2 snap-x">
+                            {HAMPER_THEMES.map(theme => {
+                                const isSelected = selectedTheme.id === theme.id;
+                                return (
+                                    <button 
+                                        key={theme.id} 
+                                        onClick={() => setSelectedTheme(theme)} 
+                                        className={`relative flex-shrink-0 w-32 h-44 rounded-t-full rounded-b-3xl p-4 flex flex-col items-center justify-center text-center transition-all duration-500 group snap-center border-2 ${isSelected ? 'shadow-[0_10px_20px_-10px_rgba(0,0,0,0.2)] transform -translate-y-2 border-transparent' : 'bg-gray-50/50 border-gray-100 hover:border-gray-200 hover:bg-gray-100/50'}`}
+                                        style={isSelected ? { background: `linear-gradient(135deg, ${theme.color}, ${theme.color}dd)` } : {}}
+                                    >
+                                        {/* Decorative inner aura when selected */}
+                                        {isSelected && (
+                                            <div className="absolute top-0 inset-x-0 h-24 bg-white opacity-20 rounded-t-full blur-md" />
+                                        )}
+                                        
+                                        <div className={`text-4xl mb-4 transition-transform duration-500 relative z-10 ${isSelected ? 'scale-125 drop-shadow-md -translate-y-1' : 'group-hover:scale-110 drop-shadow-sm'}`}>
+                                            {theme.emoji}
+                                        </div>
+                                        
+                                        <div className={`text-sm font-black leading-tight relative z-10 transition-colors ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                                            {theme.name}
+                                        </div>
+                                        
+                                        <div className={`text-[9px] uppercase tracking-widest font-bold mt-2 relative z-10 transition-colors ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
+                                            {theme.desc.split(',')[0]}
+                                        </div>
+
+                                        {/* Sparkles effect for selected state */}
+                                        {isSelected && (
+                                            <div className="absolute -bottom-1 -left-2 text-white/30 text-5xl rotate-12">
+                                                <Sparkles className="w-12 h-12 stroke-1" />
+                                            </div>
+                                        )}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
                     {/* Budget */}
-                    <div className="festival-card rounded-2xl p-5">
-                        <h2 className="font-bold mb-3">2. Set Budget</h2>
-                        <input type="range" min={500} max={10000} step={100} value={budget} onChange={e => setBudget(+e.target.value)} className="w-full accent-primary mb-2" />
-                        <div className="flex justify-between text-sm">
-                            <span className="text-gray-500">₹500</span>
-                            <span className="font-bold text-lg" style={{ color: 'rgb(var(--color-primary))' }}>₹{budget.toLocaleString()}</span>
-                            <span className="text-gray-500">₹10,000</span>
+                    <div className="festival-card rounded-2xl p-6 border border-gray-100 shadow-sm bg-white">
+                        <h2 className="font-bold mb-4 flex items-center gap-2">
+                            <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">2</span> 
+                            Set Budget
+                        </h2>
+                        <div className="px-2">
+                            <input type="range" min={500} max={10000} step={100} value={budget} onChange={e => setBudget(+e.target.value)} className="w-full accent-primary mb-4 h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer" />
+                            <div className="flex justify-between items-center">
+                                <span className="text-xs font-bold text-gray-400">₹500</span>
+                                <span className="font-black text-2xl text-primary">₹{budget.toLocaleString()}</span>
+                                <span className="text-xs font-bold text-gray-400">₹10,000</span>
+                            </div>
                         </div>
                     </div>
 
                     {/* Product Selection */}
-                    <div className="festival-card rounded-2xl p-5">
-                        <h2 className="font-bold mb-3">3. Add Products</h2>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            {suggestedProducts.map(product => (
-                                <button key={product.id} onClick={() => addToHamper(product)} className="text-left rounded-xl overflow-hidden border-2 border-gray-100 hover:border-primary transition-all hover:scale-105 group">
-                                    <img src={product.images[0]} alt={product.name} className="w-full aspect-square object-cover" />
-                                    <div className="p-2">
-                                        <p className="text-xs font-semibold line-clamp-1">{product.name}</p>
-                                        <p className="text-xs font-bold" style={{ color: 'rgb(var(--color-primary))' }}>₹{product.price}</p>
+                    <div className="festival-card rounded-2xl p-6 border border-gray-100 shadow-sm bg-white">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="font-bold flex items-center gap-2">
+                                <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm">3</span> 
+                                Curated Products for {selectedTheme.name}
+                            </h2>
+                        </div>
+                        
+                        <div className="flex overflow-x-auto hide-scrollbar gap-4 pb-4 -mx-2 px-2 snap-x">
+                            {suggestedProducts.map(product => {
+                                const qtyInHamper = hamperItems.find(i => i.id === product.id)?.qty || 0;
+                                return (
+                                    <div key={product.id} className="relative flex-shrink-0 w-40 snap-start group">
+                                        <div className="bg-gray-50 rounded-t-[2rem] rounded-b-xl p-2 border border-gray-100 transition-all group-hover:border-primary/30 group-hover:shadow-md">
+                                            <div className="aspect-[4/5] rounded-[1.5rem] overflow-hidden relative mb-3">
+                                                <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            </div>
+                                            
+                                            <div className="px-2 text-center pb-2">
+                                                <p className="text-[11px] font-bold text-gray-800 line-clamp-1 mb-1">{product.name}</p>
+                                                <p className="text-sm font-black text-primary">₹{product.price}</p>
+                                            </div>
+                                            
+                                            <button 
+                                                onClick={() => addToHamper(product)} 
+                                                className="w-full py-2 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 flex items-center justify-center gap-1 hover:bg-primary hover:text-white hover:border-primary transition-colors"
+                                            >
+                                                <Plus className="w-3 h-3" /> {qtyInHamper > 0 ? `Add Another (${qtyInHamper})` : 'Add'}
+                                            </button>
+                                        </div>
                                     </div>
-                                </button>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
