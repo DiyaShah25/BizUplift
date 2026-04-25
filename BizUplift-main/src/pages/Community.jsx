@@ -24,13 +24,18 @@ const Community = () => {
         toggleLike(postId, currentUser.id);
     };
 
-    const handleCreatePost = () => {
+    const handleCreatePost = async () => {
         if (!currentUser) { showToast('Sign in to post', 'info'); return; }
         if (!newPost.content.trim()) { showToast('Write something!', 'error'); return; }
-        addPost({ ...newPost, authorId: currentUser.id, authorName: currentUser.name, authorAvatar: currentUser.avatar, image: null });
-        setNewPost({ type: 'review', content: '' });
-        setShowCreatePost(false);
-        showToast('Post shared! You earned 25 credit points 🌟');
+        try {
+            await addPost({ ...newPost, authorId: currentUser.id, authorName: currentUser.name, authorAvatar: currentUser.avatar, image: null });
+            setNewPost({ type: 'review', content: '' });
+            setShowCreatePost(false);
+            showToast('Post shared! You earned 25 credit points 🌟');
+        } catch (err) {
+            console.error('Failed to create post:', err);
+            showToast('Failed to share post. Please try again.', 'error');
+        }
     };
 
     const typeLabels = { review: 'Review', tip: 'Tip', seller_story: 'Seller Story' };
@@ -91,7 +96,7 @@ const Community = () => {
                             <p className="text-gray-800 leading-relaxed mb-8 text-[15px] font-medium whitespace-pre-wrap">{post.content}</p>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="font-bold text-sm text-gray-900 leading-tight">@{post.authorName.replace(/\s+/g, '').toLowerCase()}</p>
+                                    <p className="font-bold text-sm text-gray-900 leading-tight">@{post.authorName?.replace(/\s+/g, '').toLowerCase() || 'anonymous'}</p>
                                     <p className="text-[12px] text-gray-500 mt-1">{typeLabels[post.type]}</p>
                                     <div className="text-[11px] text-gray-400 mt-2 flex items-center gap-3">
                                         <span className="flex items-center gap-1.5">
