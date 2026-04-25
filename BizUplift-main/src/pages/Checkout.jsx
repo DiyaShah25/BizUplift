@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useNotifications } from '../context/NotificationContext';
+import { formatOrderId } from '../utils/formatters';
 
 const Confetti = () => {
     const colors = ['#FFD700', '#FF006E', '#06D6A0', '#E85D04', '#7C3AED', '#FF6B00'];
@@ -350,7 +351,7 @@ const Checkout = () => {
                         <div className="flex flex-col gap-4">
                             <div>
                                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Order Identifier</p>
-                                <p className="text-xl font-mono font-bold text-gray-800">{orderId}</p>
+                                <p className="text-xl font-mono font-bold text-gray-800">{formatOrderId(orderId)}</p>
                             </div>
                             <div className="h-px bg-gray-50 w-full" />
                             <div>
