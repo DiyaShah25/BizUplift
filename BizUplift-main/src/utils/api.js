@@ -1,4 +1,5 @@
-export const BASE_URL = '/api';
+// Use Vercel Backend URL if provided, otherwise fallback to local proxy
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Standard fetch wrapper that automatically attaches the
