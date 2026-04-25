@@ -92,7 +92,8 @@ export const DataProvider = ({ children }) => {
 
     // ─── Products ─────────────────────────────────────────────────────────────
     const addProduct = async (product) => {
-        const newProduct = await api.post('/products', product);
+        const res = await api.post('/products', product);
+        const newProduct = res.product || res;
         setProducts(prev => [{ ...newProduct, id: newProduct._id }, ...prev]);
         return newProduct;
     };
@@ -134,7 +135,8 @@ export const DataProvider = ({ children }) => {
 
     // ─── Posts ────────────────────────────────────────────────────────────────
     const addPost = async (post) => {
-        const newPost = await api.post('/posts', post);
+        const res = await api.post('/posts', post);
+        const newPost = res.post || res;
         setPosts(prev => [{ ...newPost, id: newPost._id }, ...prev]);
         return newPost;
     };
@@ -188,7 +190,8 @@ export const DataProvider = ({ children }) => {
 
     // ─── Reviews ──────────────────────────────────────────────────────────────
     const addReview = async (review) => {
-        const newReview = await api.post('/reviews', review);
+        const res = await api.post('/reviews', review);
+        const newReview = res.review || res;
         setReviews(prev => [...prev, { ...newReview, id: newReview._id }]);
         return newReview;
     };
@@ -234,9 +237,10 @@ export const DataProvider = ({ children }) => {
 
     // ─── Sellers ─────────────────────────────────────────────────────────────
     const createSellerProfile = async (profile) => {
-        const newSeller = await api.post('/sellers', profile);
+        const res = await api.post('/sellers', profile);
+        const newSeller = res.seller || res;
         setSellers(prev => [...prev, { ...newSeller, id: newSeller._id }]);
-        return newSeller._id;
+        return newSeller._id || newSeller.id;
     };
 
     // ─── Negotiations ─────────────────────────────────────────────────────────
