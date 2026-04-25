@@ -4,6 +4,7 @@ import { Package, Truck, CheckCircle, Clock, RotateCcw, X } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { formatOrderId } from '../utils/formatters';
 
 const STATUS_STEPS = ['Processing', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'];
 
@@ -64,7 +65,7 @@ const Orders = () => {
                         <div key={order.id} className="festival-card rounded-2xl p-5">
                             <div className="flex items-start justify-between mb-3">
                                 <div>
-                                    <p className="font-mono text-sm font-bold">{order.id}</p>
+                                    <p className="font-mono text-sm font-bold">{formatOrderId(order.id || order._id)}</p>
                                     <p className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -111,7 +112,7 @@ const Orders = () => {
                             <h3 className="font-bold">Return Request</h3>
                             <button onClick={() => setReturnModal(null)}><X className="w-5 h-5 text-gray-400" /></button>
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">Order: <span className="font-mono font-bold">{returnModal.id}</span></p>
+                        <p className="text-sm text-gray-600 mb-4">Order: <span className="font-mono font-bold">{formatOrderId(returnModal.id || returnModal._id)}</span></p>
                         <select className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm mb-3 outline-none">
                             <option>Select reason</option>
                             <option>Product damaged</option>
