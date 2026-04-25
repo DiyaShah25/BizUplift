@@ -114,7 +114,18 @@ const Auth = ({ mode: initialMode }) => {
     const handleGoogleSuccess = async (credentialResponse) => {
         setLoading(true);
         try {
-            const decoded = jwtDecode(credentialResponse.credential);
+            let decoded;
+            if (credentialResponse.credential === 'mock_google_credential_for_development') {
+                // Return a mock user object for development
+                decoded = {
+                    email: 'mockuser@example.com',
+                    name: 'Mock Google User',
+                    picture: 'https://i.pravatar.cc/150?u=mockuser'
+                };
+            } else {
+                decoded = jwtDecode(credentialResponse.credential);
+            }
+            
             // loginWithGoogle is now async — calls the backend to create/find the user
             const user = await loginWithGoogle(decoded);
             showToast(`Welcome via Google, ${user.name.split(' ')[0]}! 🎉`);
@@ -268,14 +279,30 @@ const Auth = ({ mode: initialMode }) => {
 
                                     <div className="flex justify-center flex-col items-center">
                                         <div className="w-full flex justify-center hover:scale-[1.02] transition-transform">
-                                            <GoogleLogin
-                                                onSuccess={handleGoogleSuccess}
-                                                onError={() => setErrors({ general: 'Google Login was unsuccessful' })}
-                                                useOneTap
-                                                theme={isDiwali ? 'filled_black' : 'outline'}
-                                                shape="pill"
-                                                size="large"
-                                            />
+                                            {(!import.meta.env.VITE_GOOGLE_CLIENT_ID || import.meta.env.VITE_GOOGLE_CLIENT_ID.includes('YOUR_GOOGLE_CLIENT_ID_HERE')) ? (
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => {
+                                                        showToast('Running in Mock Google Mode 🛠️');
+                                                        handleGoogleSuccess({
+                                                            credential: 'mock_google_credential_for_development'
+                                                        });
+                                                    }}
+                                                    className="w-full py-3 px-4 rounded-full border-2 border-gray-200 bg-white flex items-center justify-center gap-3 font-bold text-gray-700 hover:bg-gray-50 transition-all"
+                                                >
+                                                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" className="w-5 h-5" />
+                                                    Mock Google Sign In
+                                                </button>
+                                            ) : (
+                                                <GoogleLogin
+                                                    onSuccess={handleGoogleSuccess}
+                                                    onError={() => setErrors({ general: 'Google Login was unsuccessful' })}
+                                                    useOneTap
+                                                    theme={isDiwali ? 'filled_black' : 'outline'}
+                                                    shape="pill"
+                                                    size="large"
+                                                />
+                                            )}
                                         </div>
                                     </div>
                                 </motion.div>

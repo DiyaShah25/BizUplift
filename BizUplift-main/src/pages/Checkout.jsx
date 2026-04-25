@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useNotifications } from '../context/NotificationContext';
+import { formatOrderId } from '../utils/formatters';
 
 const Confetti = () => {
     const colors = ['#FFD700', '#FF006E', '#06D6A0', '#E85D04', '#7C3AED', '#FF6B00'];
@@ -336,14 +337,45 @@ const Checkout = () => {
 
             {/* Step 3: Success */}
             {step === 3 && (
-                <div className="text-center py-12">
-                    <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 text-5xl animate-bounce-once">🎉</div>
-                    <h2 className="text-3xl font-heading font-bold mb-2">Order Placed!</h2>
-                    <p className="text-gray-500 mb-2">Order ID: <span className="font-mono font-bold">{orderId}</span></p>
-                    <p className="text-gray-500 mb-8">You'll receive a confirmation shortly. Estimated delivery: 4-6 business days.</p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <button onClick={() => navigate('/orders')} className="px-6 py-3 rounded-xl font-bold text-white" style={{ background: 'var(--btn-gradient)' }}>Track Order</button>
-                        <button onClick={() => navigate('/')} className="px-6 py-3 rounded-xl border border-gray-200 font-bold text-sm">Continue Shopping</button>
+                <div className="text-center py-12 max-w-lg mx-auto">
+                    <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6 text-5xl animate-bounce-once shadow-inner">🎉</div>
+                    <h2 className="text-4xl font-heading font-bold mb-3" style={{ background: 'var(--btn-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                        Thank you for your order!
+                    </h2>
+                    <p className="text-lg font-medium text-gray-700 mb-6">
+                        We've received your request and we're getting it ready for you.
+                    </p>
+                    
+                    <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-xl shadow-gray-200/50 mb-10 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1.5" style={{ background: 'var(--btn-gradient)' }} />
+                        <div className="flex flex-col gap-4">
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Order Identifier</p>
+                                <p className="text-xl font-mono font-bold text-gray-800">{formatOrderId(orderId)}</p>
+                            </div>
+                            <div className="h-px bg-gray-50 w-full" />
+                            <div>
+                                <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Estimated Arrival</p>
+                                <p className="text-2xl font-bold text-primary flex items-center justify-center gap-2" style={{ color: 'rgb(var(--color-primary))' }}>
+                                    <Package className="w-6 h-6" />
+                                    {(() => {
+                                        const min = new Date(); min.setDate(min.getDate() + 3);
+                                        const max = new Date(); max.setDate(max.getDate() + 7);
+                                        const opt = { month: 'short', day: 'numeric' };
+                                        return `${min.toLocaleDateString('en-US', opt)} — ${max.toLocaleDateString('en-US', opt)}`;
+                                    })()}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onClick={() => navigate('/orders')} className="flex-1 px-8 py-4 rounded-2xl font-bold text-white shadow-lg hover:shadow-primary/20 transition-all active:scale-95" style={{ background: 'var(--btn-gradient)' }}>
+                            Track Your Order
+                        </button>
+                        <button onClick={() => navigate('/')} className="flex-1 px-8 py-4 rounded-2xl border-2 border-gray-100 bg-white font-bold text-gray-600 hover:border-gray-200 transition-all active:scale-95">
+                            Back to Home
+                        </button>
                     </div>
                 </div>
             )}
