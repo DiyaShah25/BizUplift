@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     // seller reference (only for role='seller')
     sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Seller', default: null },
     credits:  { type: Number, default: 0 },
+    plan:     { type: String, enum: ['Starter', 'Standard', 'Premium'], default: 'Starter' },
 }, { timestamps: true });
 
 // Hash password before save

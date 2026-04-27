@@ -25,6 +25,7 @@ const sellerSchema = new mongoose.Schema({
     joinedAt:    { type: String, default: () => new Date().toISOString().split('T')[0] },
     products:    { type: Number, default: 0 },
     milestones:  [milestoneSchema],
+    plan:        { type: String, enum: ['Starter', 'Standard', 'Premium'], default: 'Starter' },
     // back-reference to user account
     userId:      { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 }, { timestamps: true });

@@ -25,7 +25,7 @@ const getUser = async (req, res, next) => {
 // PUT /api/users/:id  (protected — own profile or admin)
 const updateUser = async (req, res, next) => {
     try {
-        const { name, mobile, avatar } = req.body;
+        const { name, mobile, avatar, plan } = req.body;
 
         // Only allow updating own profile unless admin
         if (req.user._id.toString() !== req.params.id && req.user.role !== 'admin')
@@ -33,7 +33,7 @@ const updateUser = async (req, res, next) => {
 
         const user = await User.findByIdAndUpdate(
             req.params.id,
-            { name, mobile, avatar },
+            { name, mobile, avatar, plan },
             { new: true, runValidators: true }
         ).select('-password');
 
@@ -45,10 +45,10 @@ const updateUser = async (req, res, next) => {
 // PUT /api/users/profile  (protected — update own profile from token)
 const updateProfile = async (req, res, next) => {
     try {
-        const { name, mobile, avatar } = req.body;
+        const { name, mobile, avatar, plan } = req.body;
         const user = await User.findByIdAndUpdate(
             req.user._id,
-            { name, mobile, avatar },
+            { name, mobile, avatar, plan },
             { new: true, runValidators: true }
         ).select('-password');
         if (!user) return res.status(404).json({ success: false, message: 'User not found' });
