@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useNotifications } from '../context/NotificationContext';
 import { formatOrderId } from '../utils/formatters';
+import { BASE_URL } from '../utils/api';
 
 const Confetti = () => {
     const colors = ['#FFD700', '#FF006E', '#06D6A0', '#E85D04', '#7C3AED', '#FF6B00'];
@@ -107,7 +108,7 @@ const Checkout = () => {
                 showToast('Order placed successfully! 🎉');
             } else {
                 // Razorpay Online Flow
-                const response = await fetch('/api/orders/razorpay', {
+                const response = await fetch(`${BASE_URL}/orders/razorpay`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -115,7 +116,11 @@ const Checkout = () => {
                     },
                     body: JSON.stringify({ amount: total, currency: 'INR' })
                 });
-                const { razorpayOrder } = await response.json();
+                const data = await response.json();
+                if (!data.success || !data.razorpayOrder) {
+                    throw new Error(data.message || 'Failed to create Razorpay order');
+                }
+                const { razorpayOrder } = data;
 
                 const options = {
                     key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder', // Should be provided by user
@@ -127,7 +132,7 @@ const Checkout = () => {
                     handler: async function (response) {
                         // Verify payment signature
                         setLoading(true);
-                        const verifyRes = await fetch('/api/orders/verify', {
+                        const verifyRes = await fetch(`${BASE_URL}/orders/verify`, {
                             method: 'POST',
                             headers: { 
                                 'Content-Type': 'application/json',

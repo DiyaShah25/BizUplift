@@ -243,6 +243,12 @@ export const DataProvider = ({ children }) => {
         return newSeller._id || newSeller.id;
     };
 
+    const updateSellerPlan = async (id, plan) => {
+        const updated = await api.put(`/sellers/${id}`, { plan });
+        const seller = updated.seller || updated;
+        setSellers(prev => prev.map(s => (s.id === id || s._id === id) ? { ...seller, id: seller._id || seller.id } : s));
+    };
+
     // ─── Negotiations ─────────────────────────────────────────────────────────
     const saveNegotiation = async (negotiation) => {
         try {
@@ -277,7 +283,7 @@ export const DataProvider = ({ children }) => {
             addCredits, getUserCredits, redeemCredits,
 
             // Sellers
-            createSellerProfile,
+            createSellerProfile, updateSellerPlan,
 
             // Negotiations
             saveNegotiation,

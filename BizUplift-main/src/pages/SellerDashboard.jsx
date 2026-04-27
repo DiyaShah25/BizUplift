@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Plus, Edit3, Trash2, X, Eye } from 'lucide-react';
+import { Plus, Edit3, Trash2, X, Eye, Crown, Rocket, Sprout } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -246,7 +246,17 @@ const SellerDashboard = () => {
             <div className="flex items-center gap-4 mb-6">
                 <img src={currentUser.avatar} alt="" className="w-14 h-14 rounded-full object-cover border-4" style={{ borderColor: 'rgb(var(--color-primary))' }} />
                 <div>
-                    <h1 className="text-xl font-heading font-bold">{seller?.business || currentUser.name}</h1>
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl font-heading font-bold">{seller?.business || currentUser.name}</h1>
+                        {seller?.plan && seller.plan !== 'Starter' && (
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-sm border border-gray-100 text-[10px] font-black uppercase tracking-widest">
+                                {seller.plan === 'Premium' ? <Crown className="w-3 h-3 text-red-500" /> : <Rocket className="w-3 h-3 text-orange-500" />}
+                                <span className={seller.plan === 'Premium' ? 'text-red-600' : 'text-orange-600'}>
+                                    {seller.plan}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                     <p className="text-sm text-gray-500">{seller?.city} · {seller?.verified ? '✓ Verified Seller' : 'Pending Verification'}</p>
                 </div>
             </div>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Package, Check, BadgeCheck, MessageCircle, Heart, Share2, Grid, Layers, ExternalLink } from 'lucide-react';
+import { Star, MapPin, Package, Check, BadgeCheck, MessageCircle, Heart, Share2, Grid, Layers, ExternalLink, Crown, Rocket, Sprout } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -93,6 +93,14 @@ const SellerProfile = () => {
                             {seller.business}
                             {seller.verified && (
                                 <BadgeCheck className="w-7 h-7 fill-blue-500 text-white" aria-label="Verified" />
+                            )}
+                            {seller.plan && seller.plan !== 'Starter' && (
+                                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white shadow-sm border border-gray-100 text-[11px] font-black uppercase tracking-widest ml-2">
+                                    {seller.plan === 'Premium' ? <Crown className="w-3.5 h-3.5 text-red-500" /> : <Rocket className="w-3.5 h-3.5 text-orange-500" />}
+                                    <span className={seller.plan === 'Premium' ? 'text-red-600' : 'text-orange-600'}>
+                                        {seller.plan}
+                                    </span>
+                                </div>
                             )}
                         </h1>
                         <p className="text-lg text-gray-500 font-medium mb-4">{seller.name}</p>

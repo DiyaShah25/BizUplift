@@ -6,6 +6,14 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { useData } from '../../context/DataContext';
+import { Crown, Rocket, Sprout } from 'lucide-react';
+
+const PlanBadge = ({ plan, className = "" }) => {
+    if (!plan || plan === 'Starter') return <Sprout className={`w-3.5 h-3.5 text-amber-500 ${className}`} />;
+    if (plan === 'Standard') return <Rocket className={`w-3.5 h-3.5 text-orange-500 ${className}`} />;
+    if (plan === 'Premium') return <Crown className={`w-3.5 h-3.5 text-red-500 ${className}`} />;
+    return null;
+};
 
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -201,7 +209,17 @@ const Navbar = () => {
                                 <button onClick={() => { setUserMenuOpen(!userMenuOpen); setNotifOpen(false); }}
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-primary/10 transition-colors">
                                     <img src={currentUser.avatar || `https://i.pravatar.cc/40?u=${currentUser.id}`} alt="" className="w-7 h-7 rounded-full object-cover" />
-                                    <span className="hidden md:block text-sm font-semibold" style={{ color: textColor }}>{currentUser.name.split(' ')[0]}</span>
+                                    <div className="hidden md:flex flex-col items-start leading-tight">
+                                        <span className="text-sm font-semibold" style={{ color: textColor }}>{currentUser.name.split(' ')[0]}</span>
+                                        {currentUser.role === 'seller' && (
+                                            <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider opacity-80">
+                                                <PlanBadge plan={currentUser.plan} />
+                                                <span style={{ color: currentUser.plan === 'Premium' ? '#ef4444' : currentUser.plan === 'Standard' ? '#f97316' : '#f59e0b' }}>
+                                                    {currentUser.plan || 'Starter'}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
                                     <ChevronDown className="w-3 h-3 hidden md:block" style={{ color: mutedColor }} />
                                 </button>
                                 {userMenuOpen && (

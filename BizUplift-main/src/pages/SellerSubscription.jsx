@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { X, Check } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useData } from '../context/DataContext';
+import { BASE_URL } from '../utils/api';
 
 const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -14,8 +16,9 @@ const loadRazorpayScript = () => {
 };
 
 const SellerSubscription = () => {
-    const { currentUser } = useAuth();
+    const { currentUser, updateCurrentUser } = useAuth();
     const { showToast } = useNotifications();
+    const { updateSellerPlan } = useData();
     const navigate = useNavigate();
 
     if (!currentUser || currentUser.role !== 'seller') { navigate('/auth'); return null; }
@@ -34,7 +37,7 @@ const SellerSubscription = () => {
             
             if (token) {
                 try {
-                    const response = await fetch('/api/orders/razorpay', {
+                    const response = await fetch(`${BASE_URL}/orders/razorpay`, {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -57,8 +60,21 @@ const SellerSubscription = () => {
                 name: 'BizUplift',
                 description: `${planName} Plan Subscription`,
                 order_id: razorpayOrderId.startsWith('mock') ? undefined : razorpayOrderId,
-                handler: function (response) {
-                    showToast(`Successfully upgraded to ${planName} Plan! 🎉`);
+                handler: async function (response) {
+                    try {
+                        // 1. Update User Plan
+                        await updateCurrentUser({ plan: planName });
+                        
+                        // 2. Update Seller Profile Plan (if applicable)
+                        if (currentUser.sellerId) {
+                            await updateSellerPlan(currentUser.sellerId, planName);
+                        }
+
+                        showToast(`Successfully upgraded to ${planName} Plan! 🎉`);
+                    } catch (err) {
+                        console.error('Failed to update plan:', err);
+                        showToast(`Payment successful, but failed to update plan in profile.`, 'warning');
+                    }
                 },
                 prefill: {
                     name: currentUser?.name || 'Seller',
@@ -120,8 +136,16 @@ const SellerSubscription = () => {
                                     <div className="flex items-center gap-3 text-amber-200/70"><span className="w-5 h-5 flex items-center justify-center font-bold text-amber-400">%</span> Pays 2% Fee</div>
                                 </div>
 
-                                <button onClick={() => showToast('You are already on the Starter Plan!')} className="mt-8 w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-xl transition-colors border border-white/10">
-                                    Current Plan
+                                <button 
+                                    onClick={() => showToast('You are already on the Starter Plan!')} 
+                                    disabled={currentUser?.plan === 'Starter' || !currentUser?.plan}
+                                    className={`mt-8 w-full font-bold py-3 rounded-xl transition-colors border ${
+                                        (currentUser?.plan === 'Starter' || !currentUser?.plan)
+                                        ? 'bg-white/10 text-white border-white/20' 
+                                        : 'bg-white/5 hover:bg-white/10 text-white border-white/10'
+                                    }`}
+                                >
+                                    {currentUser?.plan === 'Starter' || !currentUser?.plan ? 'Current Plan' : 'Select Starter'}
                                 </button>
                             </div>
 
@@ -151,8 +175,16 @@ const SellerSubscription = () => {
                                     <div className="flex items-center gap-3 text-orange-200/80"><span className="w-5 h-5 flex items-center justify-center font-bold text-orange-400">%</span> Pays 1% Fee</div>
                                 </div>
 
-                                <button onClick={() => handleSubscriptionPayment('Standard', 999)} className="mt-8 w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-orange-500/25">
-                                    Upgrade Now
+                                <button 
+                                    onClick={() => currentUser?.plan === 'Standard' ? showToast('You are already on the Standard Plan!') : handleSubscriptionPayment('Standard', 999)} 
+                                    disabled={currentUser?.plan === 'Standard'}
+                                    className={`mt-8 w-full font-bold py-3 rounded-xl transition-all shadow-lg ${
+                                        currentUser?.plan === 'Standard'
+                                        ? 'bg-orange-500/20 text-orange-200 border border-orange-500/30 cursor-default'
+                                        : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 text-white shadow-orange-500/25'
+                                    }`}
+                                >
+                                    {currentUser?.plan === 'Standard' ? 'Current Plan' : 'Upgrade Now'}
                                 </button>
                             </div>
 
@@ -178,8 +210,16 @@ const SellerSubscription = () => {
                                     <div className="flex items-center gap-3 text-red-300/80"><Check className="w-5 h-5 text-red-500 drop-shadow-[0_0_3px_rgba(220,38,38,0.5)]"/> Zero Platform Fee</div>
                                 </div>
 
-                                <button onClick={() => handleSubscriptionPayment('Premium', 2999)} className="mt-8 w-full bg-white/5 hover:bg-red-500/20 text-white font-bold py-3 rounded-xl transition-colors border border-white/10 hover:border-red-500/50 hover:text-red-300">
-                                    Go Premium
+                                <button 
+                                    onClick={() => currentUser?.plan === 'Premium' ? showToast('You are already on the Premium Plan!') : handleSubscriptionPayment('Premium', 2999)} 
+                                    disabled={currentUser?.plan === 'Premium'}
+                                    className={`mt-8 w-full font-bold py-3 rounded-xl transition-colors border ${
+                                        currentUser?.plan === 'Premium'
+                                        ? 'bg-red-500/20 text-red-300 border-red-500/50 cursor-default'
+                                        : 'bg-white/5 hover:bg-red-500/20 text-white border-white/10 hover:border-red-500/50 hover:text-red-300'
+                                    }`}
+                                >
+                                    {currentUser?.plan === 'Premium' ? 'Current Plan' : 'Go Premium'}
                                 </button>
                             </div>
 
