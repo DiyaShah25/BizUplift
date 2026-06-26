@@ -68,4 +68,15 @@ Finally, navigate to the local Vite host location in your browser:
 
 ---
 
+## 🌐 Live Demo
+
+The project is live and can be accessed here:
+
+**https://biz-uplift-main.vercel.app**
+
+---
+
+*This project is built and maintained as part of a Software Engineering group initiative focused on creating a user-centered, accessible, and visually engaging marketplace for local artisans.*
+---
+
 *This project is built and maintained as part of a Software Engineering group initiative focusing on user-centered, accessible, visually stunning marketplace architecture.*
